@@ -1,6 +1,9 @@
 from fastapi import FastAPI
+from app.routers import tasks
+
 
 app = FastAPI(title="Task Tracker")
+app.include_router(tasks.router)
 
 @app.get("/health")
 async def health() -> dict[str, str]:
