@@ -13,8 +13,11 @@ class TaskRepository:
         self.session.refresh(task)
         return task
     
-    def get(self, task_id: int) -> Task | None:
-        return self.session.get(Task, task_id)
+    def get(self, task_id: int, owner_id: int) -> Task | None:
+        task = self.session.get(Task, task_id)
+        if task is None or task.owner_id != owner_id:
+            return None
+        return task
     
     def list_for_user(self, owner_id: int, status: str | None = None) -> list[Task]:
         stmt = select(Task).where(Task.owner_id == owner_id)
@@ -24,19 +27,19 @@ class TaskRepository:
         return list(self.session.scalars(stmt))
 
     
-    def update(self, task_id: int, **fields) -> Task | None:
+    def update(self, task_id: int, owner_id: int, **fields) -> Task | None:
         task = self.session.get(Task, task_id)
-        if task is None:
+        if task is None or task.owner_id != owner_id:
             return None
         for key, value in fields.items():
             setattr(task, key, value)
         self.session.commit()
         self.session.refresh(task)
         return task
-    
-    def delete(self, task_id: int) -> bool:
+
+    def delete(self, task_id: int, owner_id: int) -> bool:
         task = self.session.get(Task, task_id)
-        if task is None:
+        if task is None or task.owner_id != owner_id:
             return False
         self.session.delete(task)
         self.session.commit()

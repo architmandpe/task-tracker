@@ -16,3 +16,11 @@ class TaskRead(BaseModel):
 class TaskUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
+
+class SignupIn(BaseModel):
+    email: str
+    password: str = Field(min_length=8)
+
+class TokenOut(BaseModel):
+    access_token: str
+    token_type: str
