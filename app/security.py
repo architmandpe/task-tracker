@@ -1,3 +1,6 @@
+import os
+import datetime as dt
+from jose import jwt
 from passlib.context import CryptContext
 
 pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -8,10 +11,9 @@ def hash_password(plain: str) -> str:
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd.verify(plain, hashed)
 
-import datetime as dt
-from jose import jwt
 
-SECRET = "dev-secret-change-me"  # TODO: move to env var
+
+SECRET = os.environ["JWT_SECRET"]  # TODO: move to env var
 ALGORITHM = "HS256"
 TOKEN_TTL = dt.timedelta(hours=12)
 

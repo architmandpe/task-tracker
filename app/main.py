@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from app.routers import tasks
 from app.routers import auth
 
@@ -7,6 +8,7 @@ from app.routers import auth
 app = FastAPI(title="Task Tracker")
 app.include_router(tasks.router)
 app.include_router(auth.router)
+app.mount("/app", StaticFiles(directory="static", html=True), name="static")
 
 @app.get("/health")
 async def health() -> dict[str, str]:
