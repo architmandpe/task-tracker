@@ -2,10 +2,10 @@ from collections.abc import Iterator
 from sqlalchemy.orm import Session
 from app.db import SessionLocal
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 from app.security import decode_token
 from app.repositories.user_repo import UserRepository
+from fastapi import Cookie
 
 def get_session() -> Iterator[Session]:
     session = SessionLocal()
@@ -14,13 +14,13 @@ def get_session() -> Iterator[Session]:
     finally:
         session.close()
 
-oauth2 = OAuth2PasswordBearer(tokenUrl="auth/login")  # tells FastAPI/Swagger where to get a token
 
-def get_current_user(token: str = Depends(oauth2), session: Session = Depends(get_session)):
-    creds_error = HTTPException(status.HTTP_401_UNAUTHORIZED, "could not validate credentials",
-                               headers={"WWW-Authenticate": "Bearer"})
+def get_current_user(access_token: str | None = Cookie(default=None), session: Session = Depends(get_session)):
+    creds_error = HTTPException(status.HTTP_401_UNAUTHORIZED, "could not validate credentials")
+    if access_token is None:
+        raise creds_error
     try:
-        user_id = decode_token(token)        # verifies signature + expiry
+        user_id = decode_token(access_token)
     except JWTError:
         raise creds_error
     user = UserRepository(session).get(user_id)
