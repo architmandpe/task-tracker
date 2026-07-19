@@ -10,3 +10,5 @@ wheels/
 .venv
 tracker.db
 cookies.txt
+pg_cookies.txt
+.env
