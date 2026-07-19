@@ -13,7 +13,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 
-SECRET = os.environ["JWT_SECRET"]  # TODO: move to env var
+SECRET = os.environ["JWT_SECRET"]  
 ALGORITHM = "HS256"
 TOKEN_TTL = dt.timedelta(hours=12)
 
