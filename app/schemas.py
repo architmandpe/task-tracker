@@ -24,3 +24,8 @@ class SignupIn(BaseModel):
 class TokenOut(BaseModel):
     access_token: str
     token_type: str
+
+class TaskDraft(BaseModel):
+    title: str
+    due_date: str | None
+    priority: str
