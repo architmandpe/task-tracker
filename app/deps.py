@@ -1,7 +1,8 @@
+import os
 from collections.abc import Iterator
 from sqlalchemy.orm import Session
 from app.db import SessionLocal
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from jose import JWTError
 from app.security import decode_token
 from app.repositories.user_repo import UserRepository
@@ -27,3 +28,8 @@ def get_current_user(access_token: str | None = Cookie(default=None), session: S
     if user is None:
         raise creds_error
     return user
+
+
+def verify_internal_secret(x_internal_secret: str = Header(...)) -> None:
+    if x_internal_secret != os.environ["INTERNAL_SECRET"]:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "invalid internal secret")

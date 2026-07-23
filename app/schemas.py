@@ -29,3 +29,11 @@ class TaskDraft(BaseModel):
     title: str
     due_date: str | None
     priority: str
+
+class TaskInternal(BaseModel):
+    id: int
+    title: str
+    status: str
+    due_at: dt.datetime | None
+    priority: str
+    model_config = {"from_attributes": True}
