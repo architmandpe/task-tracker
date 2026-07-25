@@ -36,3 +36,23 @@ def ask_assistant(body: AskIn, user=Depends(get_current_user)) -> dict:
     )
     resp.raise_for_status()
     return resp.json()
+
+
+class ChatIn(BaseModel):
+    message: str | None = None
+    confirm: bool | None = None
+
+@router.post("/chat")
+def chat_assistant(body: ChatIn, user=Depends(get_current_user)) -> dict:
+    resp = httpx.post(
+        f"{COPILOT_URL}/chat",
+        json={
+            "user_id": user.id,
+            "thread_id": str(user.id),
+            "message": body.message,
+            "confirm": body.confirm,
+        },
+        headers={"X-Internal-Secret": INTERNAL_SECRET},
+    )
+    resp.raise_for_status()
+    return resp.json()
