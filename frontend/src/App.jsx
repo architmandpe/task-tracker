@@ -11,7 +11,7 @@ export default function App() {
   const [error, setError] = useState("");
   const [loadError, setLoadError] = useState("");
 
-  async function loadTasks() {
+  async function loadTasks(isInitialCheck = false) {
     setLoadError("");
     let resp;
     try {
@@ -22,7 +22,7 @@ export default function App() {
     }
     if (resp.status === 401) {
       setLoggedIn(false);
-      setError("Session expired, log in again");
+      if (!isInitialCheck) setError("Session expired, log in again");
       return;
     }
     if (!resp.ok) {
@@ -34,7 +34,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    loadTasks();
+    loadTasks(true);
   }, []);
 
   if (loggedIn === null) {

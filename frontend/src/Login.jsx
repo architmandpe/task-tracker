@@ -53,7 +53,7 @@ export default function Login({ onLoggedIn }) {
           <>Have an account? <button type="button" onClick={() => setMode("login")}>Log in</button></>
         )}
       </p>
-      <div id="error">{error}</div>
+      {error && <div id="error">{error}</div>}
     </div>
   );
 }

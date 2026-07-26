@@ -88,18 +88,23 @@ def stream_assistant(body: ChatIn, user=Depends(get_current_user)) -> StreamingR
     enforce_message_guardrails(user.id, body.message)
 
     def event_stream():
-        with httpx.stream(
-            "POST",
-            f"{COPILOT_URL}/stream",
-            json={
-                "user_id": user.id,
-                "thread_id": str(user.id),
-                "message": body.message,
-                "confirm": body.confirm,
-            },
-            headers={"X-Internal-Secret": INTERNAL_SECRET},
-        ) as resp:
-            for chunk in resp.iter_bytes():
-                yield chunk
+        try:
+            with httpx.stream(
+                "POST",
+                f"{COPILOT_URL}/stream",
+                json={
+                    "user_id": user.id,
+                    "thread_id": str(user.id),
+                    "message": body.message,
+                    "confirm": body.confirm,
+                },
+                headers={"X-Internal-Secret": INTERNAL_SECRET},
+                timeout=httpx.Timeout(60.0, connect=10.0),
+            ) as resp:
+                for chunk in resp.iter_bytes():
+                    yield chunk
+        except Exception:
+            yield b"data: I'm having trouble reaching the assistant right now. Please try again in a moment.\n\n"
+            yield b"data: [DONE]\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")

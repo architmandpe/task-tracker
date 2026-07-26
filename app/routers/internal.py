@@ -30,3 +30,14 @@ def internal_delete_task(user_id: int, task_id: int, session: Session = Depends(
     deleted = TaskRepository(session).delete(task_id, owner_id=user_id)
     if not deleted:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "task not found")
+
+
+class InternalBulkDelete(BaseModel):
+    task_ids: list[int]
+
+@router.delete("/tasks/{user_id}")
+def internal_delete_tasks(user_id: int, body: InternalBulkDelete, session: Session = Depends(get_session)) -> dict:
+    repo = TaskRepository(session)
+    deleted = [tid for tid in body.task_ids if repo.delete(tid, owner_id=user_id)]
+    not_found = [tid for tid in body.task_ids if tid not in deleted]
+    return {"deleted": deleted, "not_found": not_found}
