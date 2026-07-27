@@ -52,16 +52,20 @@ export default function App() {
   if (loggedIn === null) {
     return (
       <div id="app">
-        <p id="loading">Loading…</p>
+        <div id="loading">
+          <div className="spinner" />
+        </div>
       </div>
     );
   }
 
   return (
     <div id="app">
-      <h1>Task Tracker</h1>
       {loggedIn ? (
         <>
+          <header id="app-header">
+            <h1>Task Tracker</h1>
+          </header>
           <div id="panels">
             <TaskList tasks={tasks} error={loadError} />
             <Chat onAction={refreshAfterAction} />

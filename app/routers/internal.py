@@ -21,15 +21,14 @@ def internal_list_tasks(user_id: int, session: Session = Depends(get_session)) -
 class InternalTaskCreate(BaseModel):
     title: str
     description: str | None = None
+    priority: str | None = None
     due_at: dt.datetime | None = None
     recurrence: str | None = None
 
 @router.post("/tasks/{user_id}", response_model=TaskInternal, status_code=status.HTTP_201_CREATED)
 def internal_create_task(user_id: int, body: InternalTaskCreate, session: Session = Depends(get_session)) -> TaskInternal:
-    return TaskRepository(session).create(
-        title=body.title, owner_id=user_id, description=body.description,
-        due_at=body.due_at, recurrence=body.recurrence,
-    )
+    fields = body.model_dump(exclude_unset=True, exclude_none=True, exclude={"title"})
+    return TaskRepository(session).create(title=body.title, owner_id=user_id, **fields)
 
 
 class InternalBulkCreate(BaseModel):

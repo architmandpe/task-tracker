@@ -22,7 +22,11 @@ export default function Search() {
 
   return (
     <div id="search-section">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="search-form">
+        <svg className="search-icon" viewBox="0 0 20 20" fill="none">
+          <circle cx="9" cy="9" r="6.5" stroke="currentColor" strokeWidth="1.5" />
+          <path d="M14 14L17.5 17.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
         <input
           placeholder="Search your tasks..."
           value={query}

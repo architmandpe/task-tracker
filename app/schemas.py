@@ -11,6 +11,9 @@ class TaskRead(BaseModel):
     description: str | None
     status: str
     created_at: dt.datetime
+    priority: str
+    due_at: dt.datetime | None
+    recurrence: str | None
     model_config = {"from_attributes": True}
 
 class TaskUpdate(BaseModel):
