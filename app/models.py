@@ -24,3 +24,13 @@ class Task(Base):
     owner: Mapped["User"] = relationship(back_populates = "tasks")
     priority: Mapped[str] = mapped_column(String(20), default="normal")
     due_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
+    recurrence: Mapped[str | None] = mapped_column(String(20), nullable=True)
+
+class AgentAction(Base):
+    __tablename__ = "agent_actions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    action: Mapped[str] = mapped_column(String(50))
+    summary: Mapped[str] = mapped_column(Text())
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, server_default=func.now())

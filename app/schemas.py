@@ -36,4 +36,24 @@ class TaskInternal(BaseModel):
     status: str
     due_at: dt.datetime | None
     priority: str
+    recurrence: str | None
+    model_config = {"from_attributes": True}
+
+class InternalTaskUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    status: str | None = None
+    priority: str | None = None
+    due_at: dt.datetime | None = None
+    recurrence: str | None = None
+
+class AgentActionCreate(BaseModel):
+    action: str
+    summary: str
+
+class AgentActionRead(BaseModel):
+    id: int
+    action: str
+    summary: str
+    created_at: dt.datetime
     model_config = {"from_attributes": True}

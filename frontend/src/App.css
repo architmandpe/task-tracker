@@ -220,3 +220,33 @@ button.secondary:hover {
   display: flex;
   gap: 8px;
 }
+
+#activity-section {
+  margin-top: 24px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.activity-entry {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.activity-entry:last-child {
+  border-bottom: none;
+}
+
+.activity-summary {
+  color: var(--text);
+}
+
+.activity-time {
+  color: var(--text-muted);
+  white-space: nowrap;
+}

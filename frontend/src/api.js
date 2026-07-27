@@ -19,6 +19,10 @@ export function listTasks() {
   return request("/tasks");
 }
 
+export function getAuditLog() {
+  return request("/assistant/audit");
+}
+
 const CONFIRM_PREFIX = "[CONFIRM_REQUIRED] ";
 const STREAM_TIMEOUT_MS = 90000;
 

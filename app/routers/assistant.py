@@ -5,8 +5,10 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from app.deps import get_current_user
-from app.schemas import TaskDraft
+from sqlalchemy.orm import Session
+from app.deps import get_current_user, get_session
+from app.schemas import TaskDraft, AgentActionRead
+from app.repositories.agent_action_repo import AgentActionRepository
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
 
@@ -62,6 +64,20 @@ def ask_assistant(body: AskIn, user=Depends(get_current_user)) -> dict:
     return resp.json()
 
 
+class SearchIn(BaseModel):
+    query: str
+
+@router.post("/search")
+def search_assistant(body: SearchIn, user=Depends(get_current_user)) -> list[dict]:
+    resp = httpx.post(
+        f"{COPILOT_URL}/search",
+        json={"user_id": user.id, "query": body.query},
+        headers={"X-Internal-Secret": INTERNAL_SECRET},
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
 class ChatIn(BaseModel):
     message: str | None = None
     confirm: bool | None = None
@@ -81,6 +97,11 @@ def chat_assistant(body: ChatIn, user=Depends(get_current_user)) -> dict:
     )
     resp.raise_for_status()
     return resp.json()
+
+
+@router.get("/audit", response_model=list[AgentActionRead])
+def audit_log(user=Depends(get_current_user), session: Session = Depends(get_session)) -> list[AgentActionRead]:
+    return AgentActionRepository(session).list_for_user(user.id)
 
 
 @router.post("/stream")
