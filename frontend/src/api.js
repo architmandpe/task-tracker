@@ -23,6 +23,10 @@ export function getAuditLog() {
   return request("/assistant/audit");
 }
 
+export function searchTasks(query) {
+  return request("/assistant/search", { method: "POST", body: JSON.stringify({ query }) });
+}
+
 const CONFIRM_PREFIX = "[CONFIRM_REQUIRED] ";
 const STREAM_TIMEOUT_MS = 90000;
 

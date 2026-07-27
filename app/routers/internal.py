@@ -48,8 +48,14 @@ class InternalBulkUpdate(InternalTaskUpdate):
 def internal_update_tasks(user_id: int, body: InternalBulkUpdate, session: Session = Depends(get_session)) -> dict:
     fields = body.model_dump(exclude_unset=True, exclude={"task_ids"})
     repo = TaskRepository(session)
-    updated = [tid for tid in body.task_ids if repo.update(tid, owner_id=user_id, **fields)]
-    not_found = [tid for tid in body.task_ids if tid not in updated]
+    updated = []
+    not_found = []
+    for tid in body.task_ids:
+        task = repo.update(tid, owner_id=user_id, **fields)
+        if task is None:
+            not_found.append(tid)
+        else:
+            updated.append(TaskInternal.model_validate(task))
     return {"updated": updated, "not_found": not_found}
 
 
