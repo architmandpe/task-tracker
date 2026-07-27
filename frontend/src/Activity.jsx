@@ -10,10 +10,10 @@ const ICONS = {
 export default function Activity({ entries }) {
   return (
     <div id="activity-section">
-      <h3>Recent Activity</h3>
       {entries.length === 0 ? (
         <div className="empty-state">
           <p>No activity yet</p>
+          <span>Actions the assistant takes on your behalf will show up here.</span>
         </div>
       ) : (
         entries.map((e) => (

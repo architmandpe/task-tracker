@@ -2,13 +2,22 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { streamChat } from "./api";
+import { IconSparkle } from "./Icons";
 
-export default function Chat({ onAction }) {
+const SUGGESTIONS = [
+  "What's overdue?",
+  "Show my high priority tasks",
+  "Create a task to follow up tomorrow",
+  "What did I complete today?",
+];
+
+export default function Chat({ onAction, mobileOpen }) {
   const [messages, setMessages] = useState([]); // {role: "user" | "assistant", text, streaming}
   const [input, setInput] = useState("");
   const [pendingQuestion, setPendingQuestion] = useState(null);
   const [sending, setSending] = useState(false);
   const messagesRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     const el = messagesRef.current;
@@ -69,9 +78,35 @@ export default function Chat({ onAction }) {
   }
 
   return (
-    <div id="chat-section">
-      <h3>Assistant</h3>
+    <div id="chat-section" className={mobileOpen ? "mobile-open" : ""}>
+      <div className="chat-header">
+        <span className="chat-header-icon"><IconSparkle className="icon-xs" /></span>
+        <div>
+          <div className="chat-header-title">Assistant</div>
+          <div className="chat-header-subtitle">Create, update, or ask about your tasks</div>
+        </div>
+      </div>
       <div id="chat-messages" ref={messagesRef}>
+        {messages.length === 0 && (
+          <div className="chat-empty">
+            <p>How can I help?</p>
+            <div className="chat-suggestions">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className="chat-suggestion"
+                  onClick={() => {
+                    setInput(s);
+                    inputRef.current?.focus();
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {messages.map((m, i) =>
           m.role === "assistant" ? (
             <div key={i} className={`chat-msg assistant${m.streaming ? " streaming" : ""}`}>
@@ -92,6 +127,7 @@ export default function Chat({ onAction }) {
       ) : (
         <form onSubmit={handleSubmit}>
           <input
+            ref={inputRef}
             placeholder="Ask or tell the assistant..."
             value={input}
             onChange={(e) => setInput(e.target.value)}

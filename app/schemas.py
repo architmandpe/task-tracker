@@ -4,6 +4,9 @@ import datetime as dt
 class TaskCreate(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     description: str | None = None
+    priority: str | None = None
+    due_at: dt.datetime | None = None
+    recurrence: str | None = None
 
 class TaskRead(BaseModel):
     id: int
@@ -19,6 +22,10 @@ class TaskRead(BaseModel):
 class TaskUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
+    status: str | None = None
+    priority: str | None = None
+    due_at: dt.datetime | None = None
+    recurrence: str | None = None
 
 class SignupIn(BaseModel):
     email: str

@@ -15,8 +15,28 @@ export function signup(email, password) {
   return request("/auth/signup", { method: "POST", body: JSON.stringify({ email, password }) });
 }
 
+export function logout() {
+  return request("/auth/logout", { method: "POST" });
+}
+
+export function getMe() {
+  return request("/auth/me");
+}
+
 export function listTasks() {
   return request("/tasks");
+}
+
+export function createTask(fields) {
+  return request("/tasks", { method: "POST", body: JSON.stringify(fields) });
+}
+
+export function updateTask(id, fields) {
+  return request(`/tasks/${id}`, { method: "PATCH", body: JSON.stringify(fields) });
+}
+
+export function deleteTask(id) {
+  return request(`/tasks/${id}`, { method: "DELETE" });
 }
 
 export function getAuditLog() {

@@ -1,12 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.deps import get_session
+from app.deps import get_session, get_current_user
 from app.schemas import SignupIn, TokenOut
 from app.security import hash_password, verify_password, mint_token
 from app.repositories.user_repo import UserRepository
 from fastapi import Response
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.get("/me")
+def me(user=Depends(get_current_user)):
+    return {"id": user.id, "email": user.email}
 
 @router.post("/signup", status_code=201)
 def signup(body: SignupIn, session: Session = Depends(get_session)):
@@ -25,4 +30,10 @@ def login(body: SignupIn, response: Response, session: Session = Depends(get_ses
     token = mint_token(user.id)
     response.set_cookie(key="access_token", value=token, httponly=True, samesite="lax")
     return {"status": "logged in"}
+
+
+@router.post("/logout")
+def logout(response: Response):
+    response.delete_cookie(key="access_token")
+    return {"status": "logged out"}
 

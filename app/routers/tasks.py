@@ -10,7 +10,8 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 @router.post("", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
 def create_task(payload: TaskCreate, user=Depends(get_current_user), session: Session = Depends(get_session)) -> TaskRead:
     service = TaskService(session)
-    task = service.create_task(title=payload.title, description=payload.description, owner_id=user.id)
+    fields = payload.model_dump(exclude_unset=True, exclude_none=True, exclude={"title", "description"})
+    task = service.create_task(title=payload.title, description=payload.description, owner_id=user.id, **fields)
     return task
 
 @router.get("/{task_id}", response_model=TaskRead)
