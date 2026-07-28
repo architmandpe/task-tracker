@@ -1,0 +1,82 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: tracker
+      POSTGRES_PASSWORD: ${TRACKER_POSTGRES_PASSWORD}
+      POSTGRES_DB: tracker
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tracker"]
+      interval: 2s
+      retries: 10
+    restart: unless-stopped
+
+  copilot-db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: copilot
+      POSTGRES_PASSWORD: ${COPILOT_POSTGRES_PASSWORD}
+      POSTGRES_DB: copilot
+    volumes:
+      - copilot_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U copilot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  copilot:
+    build: ../copilot
+    environment:
+      DATABASE_URL: postgresql+psycopg://copilot:${COPILOT_POSTGRES_PASSWORD}@copilot-db:5432/copilot
+      TASK_TRACKER_URL: http://api:8000
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    depends_on:
+      copilot-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://tracker:${TRACKER_POSTGRES_PASSWORD}@db:5432/tracker
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      COPILOT_URL: http://copilot:8001
+    depends_on:
+      db:
+        condition: service_healthy
+      copilot:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  copilot_pgdata:
+  caddy_data:
+  caddy_config:

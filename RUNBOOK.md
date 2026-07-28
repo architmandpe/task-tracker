@@ -1,6 +1,6 @@
 # Runbook
 
-How to go from a fresh clone to a fully running system: task-tracker (API), copilot (LLM agent service), and the React frontend.
+How to go from a fresh clone to a fully running system: task-tracker (API), copilot (LLM agent service), and the React frontend. This is for local development - for putting the app on the public internet, see `DEPLOY.md` instead.
 
 ## Prerequisites
 
@@ -71,7 +71,7 @@ npm run dev
 
 Starts the Vite dev server on `http://localhost:5173`. It proxies `/auth`, `/tasks`, and `/assistant` requests to task-tracker on port 8000 (see `vite.config.js`), so the browser sees everything as same-origin — required for the `httpOnly` auth cookie to work.
 
-**Note:** task-tracker also has a legacy static mount at `http://localhost:8000/app` (`static/index.html`) — this is the original plain-HTML frontend from before the React rewrite and is no longer the real UI. The Vite dev server (`:5173`) is the actual frontend now. There's no production build step wired up yet (`npm run build` → copy `dist/` into `static/`) — this only runs in dev mode via `npm run dev`.
+**Note:** the Vite dev server (`:5173`) is what you actually use for local development - it hot-reloads on every save. `app/main.py` also serves a production build of the frontend directly at `http://localhost:8000/` (built via a multi-stage step in the `Dockerfile`), so `docker compose up --build` gives you a live preview of the real production build too, but it's a static snapshot with no hot-reload. See `DEPLOY.md` for how this is used for the actual public deployment.
 
 ## Verify it's up
 

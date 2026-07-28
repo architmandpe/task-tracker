@@ -12,3 +12,4 @@ tracker.db
 cookies.txt
 pg_cookies.txt
 .env
+.env.prod
