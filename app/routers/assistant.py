@@ -14,6 +14,23 @@ router = APIRouter(prefix="/assistant", tags=["assistant"])
 
 COPILOT_URL = os.environ.get("COPILOT_URL", "http://localhost:8001")
 INTERNAL_SECRET = os.environ["INTERNAL_SECRET"]
+COPILOT_TIMEOUT = httpx.Timeout(90.0, connect=30.0)
+
+def call_copilot(path: str, payload: dict):
+    try:
+        resp = httpx.post(
+            f"{COPILOT_URL}{path}",
+            json=payload,
+            headers={"X-Internal-Secret": INTERNAL_SECRET},
+            timeout=COPILOT_TIMEOUT,
+        )
+        resp.raise_for_status()
+        return resp.json()
+    except httpx.HTTPError:
+        raise HTTPException(
+            status.HTTP_502_BAD_GATEWAY,
+            "the assistant is temporarily unavailable, please try again in a moment",
+        )
 
 MAX_MESSAGE_LENGTH = 500
 RATE_LIMIT_MAX_REQUESTS = 10
@@ -41,13 +58,7 @@ class ParseIn(BaseModel):
 
 @router.post("/parse", response_model=TaskDraft)
 def parse_assistant(body: ParseIn, user=Depends(get_current_user)) -> TaskDraft:
-    resp = httpx.post(
-        f"{COPILOT_URL}/parse",
-        json={"sentence": body.sentence},
-        headers={"X-Internal-Secret": INTERNAL_SECRET},
-    )
-    resp.raise_for_status()
-    return resp.json()
+    return call_copilot("/parse", {"sentence": body.sentence})
 
 
 class AskIn(BaseModel):
@@ -55,13 +66,7 @@ class AskIn(BaseModel):
 
 @router.post("/ask")
 def ask_assistant(body: AskIn, user=Depends(get_current_user)) -> dict:
-    resp = httpx.post(
-        f"{COPILOT_URL}/ask",
-        json={"user_id": user.id, "question": body.question},
-        headers={"X-Internal-Secret": INTERNAL_SECRET},
-    )
-    resp.raise_for_status()
-    return resp.json()
+    return call_copilot("/ask", {"user_id": user.id, "question": body.question})
 
 
 class SearchIn(BaseModel):
@@ -69,13 +74,7 @@ class SearchIn(BaseModel):
 
 @router.post("/search")
 def search_assistant(body: SearchIn, user=Depends(get_current_user)) -> list[dict]:
-    resp = httpx.post(
-        f"{COPILOT_URL}/search",
-        json={"user_id": user.id, "query": body.query},
-        headers={"X-Internal-Secret": INTERNAL_SECRET},
-    )
-    resp.raise_for_status()
-    return resp.json()
+    return call_copilot("/search", {"user_id": user.id, "query": body.query})
 
 
 class ChatIn(BaseModel):
@@ -85,18 +84,12 @@ class ChatIn(BaseModel):
 @router.post("/chat")
 def chat_assistant(body: ChatIn, user=Depends(get_current_user)) -> dict:
     enforce_message_guardrails(user.id, body.message)
-    resp = httpx.post(
-        f"{COPILOT_URL}/chat",
-        json={
-            "user_id": user.id,
-            "thread_id": str(user.id),
-            "message": body.message,
-            "confirm": body.confirm,
-        },
-        headers={"X-Internal-Secret": INTERNAL_SECRET},
-    )
-    resp.raise_for_status()
-    return resp.json()
+    return call_copilot("/chat", {
+        "user_id": user.id,
+        "thread_id": str(user.id),
+        "message": body.message,
+        "confirm": body.confirm,
+    })
 
 
 @router.get("/audit", response_model=list[AgentActionRead])
@@ -120,7 +113,7 @@ def stream_assistant(body: ChatIn, user=Depends(get_current_user)) -> StreamingR
                     "confirm": body.confirm,
                 },
                 headers={"X-Internal-Secret": INTERNAL_SECRET},
-                timeout=httpx.Timeout(60.0, connect=10.0),
+                timeout=COPILOT_TIMEOUT,
             ) as resp:
                 for chunk in resp.iter_bytes():
                     yield chunk
