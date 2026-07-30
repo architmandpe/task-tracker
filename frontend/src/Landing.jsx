@@ -1,5 +1,31 @@
+import { useEffect, useRef, useState } from "react";
 import HeroDemo from "./HeroDemo";
 import "./Landing.css";
+
+/* Reveals a section while it is in view, so the feature blocks can land one
+   after another instead of all at once. Tracks leaving the viewport too, so the
+   run replays on the way back rather than firing exactly once per page load. */
+function useInView() {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, inView];
+}
 
 const FEATURES = [
   {
@@ -25,6 +51,8 @@ const FEATURES = [
 ];
 
 export default function Landing({ onLogin, onSignup }) {
+  const [featuresRef, featuresInView] = useInView();
+
   return (
     <div className="landing-page">
       <header className="landing-hero">
@@ -56,11 +84,11 @@ export default function Landing({ onLogin, onSignup }) {
         </div>
       </header>
 
-      <section className="landing-features">
-        <h2 className="landing-section-heading">What it actually does</h2>
-        <div className="landing-feature-grid">
+      <section className={`landing-features${featuresInView ? " is-revealed" : ""}`}>
+        <h2 className="landing-section-heading landing-beat">What it actually does</h2>
+        <div className="landing-feature-grid" ref={featuresRef}>
           {FEATURES.map((f) => (
-            <div key={f.title} className="landing-feature-block" style={{ background: f.wash }}>
+            <div key={f.title} className="landing-feature-block landing-beat" style={{ background: f.wash }}>
               <h3>{f.title}</h3>
               <p>{f.body}</p>
             </div>
