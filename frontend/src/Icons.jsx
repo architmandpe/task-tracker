@@ -122,6 +122,14 @@ export function IconRepeat({ className }) {
   );
 }
 
+export function IconSend({ className }) {
+  return (
+    <svg className={className} {...base}>
+      <path d="M8 13V4M4.5 7.5L8 4l3.5 3.5" />
+    </svg>
+  );
+}
+
 export function IconSparkle({ className }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="currentColor" stroke="none">

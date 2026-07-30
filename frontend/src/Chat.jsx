@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { streamChat } from "./api";
-import { IconSparkle } from "./Icons";
+import { IconSparkle, IconSend } from "./Icons";
 
 const SUGGESTIONS = [
   "What's overdue?",
@@ -133,6 +133,9 @@ export default function Chat({ onAction, mobileOpen }) {
             onChange={(e) => setInput(e.target.value)}
             disabled={sending}
           />
+          <button type="submit" id="chat-send" disabled={sending || !input.trim()} aria-label="Send">
+            <IconSend className="icon-xs" />
+          </button>
         </form>
       )}
     </div>

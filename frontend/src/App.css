@@ -1157,10 +1157,26 @@ kbd {
 
 #chat-section form {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 #chat-section form input {
   margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+#chat-send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 /* --- Activity --- */
