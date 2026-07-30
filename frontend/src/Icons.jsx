@@ -130,6 +130,14 @@ export function IconSend({ className }) {
   );
 }
 
+export function IconResize({ className }) {
+  return (
+    <svg className={className} {...base}>
+      <path d="M6 4L2.5 8l3.5 4M10 4l3.5 4-3.5 4" />
+    </svg>
+  );
+}
+
 export function IconSparkle({ className }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="currentColor" stroke="none">

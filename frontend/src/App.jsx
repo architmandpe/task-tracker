@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { listTasks, getAuditLog, getMe, logout as logoutRequest, updateTask } from "./api";
 import Login from "./Login";
 import Sidebar from "./Sidebar";
@@ -11,10 +11,13 @@ import Chat from "./Chat";
 import Activity from "./Activity";
 import Toasts from "./Toasts";
 import { filterTasks } from "./taskUtils";
-import { IconSparkle, IconX } from "./Icons";
+import { IconSparkle, IconX, IconResize } from "./Icons";
 import "./App.css";
 
 let toastId = 0;
+const MIN_CHAT_W = 300;
+const MAX_CHAT_W = 640;
+const DEFAULT_CHAT_W = 380;
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(null); // null = still checking
@@ -30,6 +33,32 @@ export default function App() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
+  const [chatWidth, setChatWidth] = useState(() => {
+    const saved = Number(localStorage.getItem("chatWidth"));
+    return saved >= MIN_CHAT_W && saved <= MAX_CHAT_W ? saved : DEFAULT_CHAT_W;
+  });
+  const chatWidthRef = useRef(chatWidth);
+
+  const startChatResize = useCallback((e) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = chatWidthRef.current;
+    document.body.classList.add("resizing-chat");
+
+    function onMove(ev) {
+      const next = Math.min(MAX_CHAT_W, Math.max(MIN_CHAT_W, startWidth + (startX - ev.clientX)));
+      chatWidthRef.current = next;
+      setChatWidth(next);
+    }
+    function onUp() {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.classList.remove("resizing-chat");
+      localStorage.setItem("chatWidth", String(chatWidthRef.current));
+    }
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }, []);
 
   const addToast = useCallback((text, tone = "info") => {
     const id = ++toastId;
@@ -191,7 +220,7 @@ export default function App() {
   };
 
   return (
-    <div id="workspace">
+    <div id="workspace" style={{ "--chat-w": `${chatWidth}px` }}>
       <Sidebar
         user={user}
         view={view}
@@ -219,6 +248,18 @@ export default function App() {
             <Activity entries={activity} />
           )}
         </main>
+      </div>
+
+      <div
+        id="chat-resize-handle"
+        onMouseDown={startChatResize}
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize assistant panel"
+      >
+        <div className="chat-resize-grip">
+          <IconResize className="icon-xs" />
+        </div>
       </div>
 
       <Chat onAction={refreshAfterAction} mobileOpen={mobileChatOpen} />
