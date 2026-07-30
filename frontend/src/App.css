@@ -1434,15 +1434,19 @@ body.resizing-chat {
 
 /* --- Toasts --- */
 
+/* Centred rather than bottom-right, so it never sits on top of the assistant's
+   input bar in the right-hand panel. */
 #toast-stack {
   position: fixed;
   bottom: 20px;
-  right: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 8px;
   z-index: 60;
-  max-width: 320px;
+  max-width: min(420px, calc(100vw - 40px));
 }
 
 .toast {
