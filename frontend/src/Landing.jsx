@@ -1,3 +1,4 @@
+import HeroDemo from "./HeroDemo";
 import "./Landing.css";
 
 const FEATURES = [
@@ -50,7 +51,7 @@ export default function Landing({ onLogin, onSignup }) {
             <button type="button" className="landing-btn landing-btn-ghost-light" onClick={onLogin}>Log in</button>
           </div>
           <div className="landing-mockup">
-            <img src="/hero-screenshot.png" alt="Cadence task list and AI assistant panel" />
+            <HeroDemo />
           </div>
         </div>
       </header>
