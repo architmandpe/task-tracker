@@ -1,3 +1,4 @@
+import json
 import os
 import time
 from collections import defaultdict
@@ -118,7 +119,11 @@ def stream_assistant(body: ChatIn, user=Depends(get_current_user)) -> StreamingR
                 for chunk in resp.iter_bytes():
                     yield chunk
         except Exception:
-            yield b"data: I'm having trouble reaching the assistant right now. Please try again in a moment.\n\n"
-            yield b"data: [DONE]\n\n"
+            # copilot JSON-encodes each frame's payload (see its /stream) so a chunk
+            # with an embedded newline can't collide with the "\n\n" frame terminator -
+            # match that encoding here so the frontend's parser handles both the same way.
+            msg = "I'm having trouble reaching the assistant right now. Please try again in a moment."
+            yield f"data: {json.dumps(msg)}\n\n".encode()
+            yield f"data: {json.dumps('[DONE]')}\n\n".encode()
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")

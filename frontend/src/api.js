@@ -88,7 +88,10 @@ export async function streamChat(body, onEvent) {
         buffer = buffer.slice(boundary + 2);
         if (!frame.startsWith("data: ")) continue;
 
-        const text = frame.slice("data: ".length);
+        // Each frame's payload is JSON-encoded on the backend (see copilot's /stream)
+        // so a chunk containing a literal newline - e.g. mid-stream inside a numbered
+        // list - can't collide with the blank-line SSE frame terminator above.
+        const text = JSON.parse(frame.slice("data: ".length));
         if (text === "[DONE]") return;
         if (text.startsWith(CONFIRM_PREFIX)) {
           onEvent({ type: "confirm_required", text: text.slice(CONFIRM_PREFIX.length) });
