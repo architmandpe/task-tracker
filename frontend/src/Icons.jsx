@@ -138,6 +138,14 @@ export function IconResize({ className }) {
   );
 }
 
+export function IconCadence({ className }) {
+  return (
+    <svg className={className} {...base}>
+      <path d="M4 10.5V5.5M8 12V4M12 9V7" />
+    </svg>
+  );
+}
+
 export function IconSparkle({ className }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="currentColor" stroke="none">

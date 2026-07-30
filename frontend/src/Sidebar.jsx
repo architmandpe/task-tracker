@@ -1,4 +1,4 @@
-import { IconList, IconCircleDot, IconCheckCircle, IconClock, IconPlus, IconSearch, IconLogOut, IconCommand } from "./Icons";
+import { IconList, IconCircleDot, IconCheckCircle, IconClock, IconPlus, IconSearch, IconLogOut, IconCommand, IconCadence } from "./Icons";
 
 const NAV_ITEMS = [
   { key: "all", label: "All Tasks", icon: IconList },
@@ -10,8 +10,8 @@ export default function Sidebar({ user, view, filter, counts, onSelectTasks, onS
   return (
     <aside id="sidebar">
       <div className="sidebar-brand">
-        <span className="brand-mark">T</span>
-        <span className="brand-name">Task Tracker</span>
+        <span className="brand-mark"><IconCadence className="icon-xs" /></span>
+        <span className="brand-name">Cadence</span>
       </div>
 
       <button className="sidebar-action" onClick={onNewTask}>

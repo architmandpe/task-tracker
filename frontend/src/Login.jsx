@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { login, signup } from "./api";
+import { IconCadence } from "./Icons";
 
-export default function Login({ onLoggedIn }) {
+export default function Login({ onLoggedIn, onBack, initialMode = "login" }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState("login"); // "login" | "signup"
+  const [mode, setMode] = useState(initialMode); // "login" | "signup"
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -41,8 +42,11 @@ export default function Login({ onLoggedIn }) {
     <div id="login-section">
       <div className="login-glow" aria-hidden="true" />
       <div className="login-card">
-        <div className="login-mark">T</div>
-        <h2 className="login-title">Task Tracker</h2>
+        {onBack && (
+          <button type="button" className="login-back" onClick={onBack}>← Back</button>
+        )}
+        <div className="login-mark"><IconCadence className="icon-xs" /></div>
+        <h2 className="login-title">Cadence</h2>
         <p className="login-subtitle">
           {mode === "login" ? "Welcome back — log in to continue" : "Create your account to get started"}
         </p>

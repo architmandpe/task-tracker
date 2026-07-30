@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { listTasks, getAuditLog, getMe, logout as logoutRequest, updateTask } from "./api";
 import Login from "./Login";
+import Landing from "./Landing";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import TaskList from "./TaskList";
@@ -33,6 +34,7 @@ export default function App() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
+  const [authView, setAuthView] = useState("landing"); // "landing" | "login" | "signup"
   const [chatWidth, setChatWidth] = useState(() => {
     const saved = Number(localStorage.getItem("chatWidth"));
     return saved >= MIN_CHAT_W && saved <= MAX_CHAT_W ? saved : DEFAULT_CHAT_W;
@@ -110,6 +112,7 @@ export default function App() {
   async function handleLogout() {
     await logoutRequest();
     setLoggedIn(false);
+    setAuthView("landing");
     setUser(null);
     setTasks([]);
     setActivity([]);
@@ -208,7 +211,21 @@ export default function App() {
   }
 
   if (!loggedIn) {
-    return <Login onLoggedIn={handleLoggedIn} />;
+    if (authView === "landing") {
+      return (
+        <Landing
+          onLogin={() => setAuthView("login")}
+          onSignup={() => setAuthView("signup")}
+        />
+      );
+    }
+    return (
+      <Login
+        initialMode={authView}
+        onLoggedIn={handleLoggedIn}
+        onBack={() => setAuthView("landing")}
+      />
+    );
   }
 
   const selectedTask = tasks.find((t) => t.id === selectedTaskId) || null;

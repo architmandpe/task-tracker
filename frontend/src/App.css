@@ -971,6 +971,22 @@ body.resizing-chat {
   padding: 36px 32px;
 }
 
+.login-back {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 4px 8px;
+}
+
+.login-back:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
 .login-mark {
   width: 36px;
   height: 36px;
