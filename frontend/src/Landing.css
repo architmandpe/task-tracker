@@ -18,6 +18,11 @@
   --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-body: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 
+  /* Fraunces is variable: WONK 1 swaps in its angled, flared alternates (most
+     visible on g, y and the F terminal), SOFT 0 keeps the terminals crisp.
+     wght is deliberately left out so font-weight still drives it. */
+  --display-axes: "SOFT" 0, "WONK" 1;
+
   --radius-buttons: 8px;
   --radius-large-cards: 18px;
   --radius-feature-blocks: 18px;
@@ -47,6 +52,7 @@
 
 .landing-wordmark {
   font-family: var(--font-display);
+  font-variation-settings: var(--display-axes);
   font-weight: 600;
   font-size: 27px;
   line-height: 1;
@@ -160,6 +166,7 @@
 
 .landing-headline {
   font-family: var(--font-display);
+  font-variation-settings: var(--display-axes);
   font-weight: 700;
   font-size: 88px;
   line-height: 1.02;
@@ -610,6 +617,7 @@
 
 .landing-section-heading {
   font-family: var(--font-display);
+  font-variation-settings: var(--display-axes);
   font-weight: 700;
   font-size: 36px;
   letter-spacing: 0.01em;
@@ -689,6 +697,7 @@
 
 .landing-big-wordmark {
   font-family: var(--font-display);
+  font-variation-settings: var(--display-axes);
   font-weight: 700;
   font-size: 96px;
   letter-spacing: -0.02em;
