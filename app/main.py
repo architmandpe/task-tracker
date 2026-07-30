@@ -22,10 +22,6 @@ async def health() -> dict[str, str]:
 async def version() -> dict[str, str]:
     return {"version": "0.1.0"}
 
-@app.get("/health/db")
-async def db() -> dict[str, str]:
-    return {"db": "not wired yet"}
-
 # The production frontend build (frontend/dist, copied to frontend_dist in the
 # Docker image). Mounted last - Starlette matches routes in registration
 # order, so this catch-all must come after every real route above it, or it

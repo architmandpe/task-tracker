@@ -40,7 +40,7 @@ See [RUNBOOK.md](RUNBOOK.md) — covers this repo, the sibling `copilot` repo, a
 uv run pytest
 ```
 
-15 tests. Run automatically in CI on every push to `main`; a deploy only fires if they all pass (see below).
+14 tests. Run automatically in CI on every push to `main`; a deploy only fires if they all pass (see below).
 
 ## Deployment
 

@@ -1,5 +1,7 @@
 # Deploy
 
+> **Not how the live app is actually deployed.** The real deployment is Render (API) + Neon (Postgres), gated by the CI workflow in `.github/workflows/test-and-deploy.yml` — see the root `README.md`. This doc describes a self-hosted alternative (a single VM you control) that was built and tested but isn't in use; kept here in case that path is ever needed again.
+
 How to put task-tracker + copilot on the public internet, for free, on a single VM. For local development, see `RUNBOOK.md` instead - this doc is production only.
 
 ## Shape of the deployment
