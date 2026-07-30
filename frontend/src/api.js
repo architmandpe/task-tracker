@@ -39,6 +39,11 @@ export function deleteTask(id) {
   return request(`/tasks/${id}`, { method: "DELETE" });
 }
 
+// Undoes a delete. The task keeps its original id, so its history stays intact.
+export function restoreTask(id) {
+  return request(`/tasks/${id}/restore`, { method: "POST" });
+}
+
 export function getAuditLog() {
   return request("/assistant/audit");
 }

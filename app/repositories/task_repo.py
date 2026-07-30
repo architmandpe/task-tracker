@@ -34,14 +34,16 @@ class TaskRepository:
         self.session.refresh(task)
         return task
 
-    def get(self, task_id: int, owner_id: int) -> Task | None:
+    def get(self, task_id: int, owner_id: int, *, include_deleted: bool = False) -> Task | None:
         task = self.session.get(Task, task_id)
         if task is None or task.owner_id != owner_id:
+            return None
+        if task.deleted_at is not None and not include_deleted:
             return None
         return task
 
     def list_for_user(self, owner_id: int, status: str | None = None) -> list[Task]:
-        stmt = select(Task).where(Task.owner_id == owner_id)
+        stmt = select(Task).where(Task.owner_id == owner_id, Task.deleted_at.is_(None))
         if status is not None:
             stmt = stmt.where(Task.status == status)
         stmt = stmt.order_by(Task.created_at.desc())
@@ -49,8 +51,8 @@ class TaskRepository:
 
 
     def update(self, task_id: int, owner_id: int, **fields) -> Task | None:
-        task = self.session.get(Task, task_id)
-        if task is None or task.owner_id != owner_id:
+        task = self.get(task_id, owner_id)
+        if task is None:
             return None
         completing = fields.get("status") == "done" and task.status != "done"
         for key, value in fields.items():
@@ -66,9 +68,21 @@ class TaskRepository:
         return task
 
     def delete(self, task_id: int, owner_id: int) -> bool:
-        task = self.session.get(Task, task_id)
-        if task is None or task.owner_id != owner_id:
+        """Soft delete: the row stays, so restore() can bring back the same task."""
+        task = self.get(task_id, owner_id)
+        if task is None:
             return False
-        self.session.delete(task)
+        task.deleted_at = dt.datetime.now(dt.timezone.utc).replace(tzinfo=None)
         self.session.commit()
         return True
+
+    def restore(self, task_id: int, owner_id: int) -> Task | None:
+        """Undo a soft delete. Returns None for a task that was never deleted, so
+        a stale undo can't resurrect something the user is still working on."""
+        task = self.get(task_id, owner_id, include_deleted=True)
+        if task is None or task.deleted_at is None:
+            return None
+        task.deleted_at = None
+        self.session.commit()
+        self.session.refresh(task)
+        return task

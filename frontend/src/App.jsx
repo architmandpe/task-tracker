@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { listTasks, getAuditLog, getMe, logout as logoutRequest, updateTask } from "./api";
+import { listTasks, getAuditLog, getMe, logout as logoutRequest, updateTask, deleteTask, restoreTask } from "./api";
 import Login from "./Login";
 import Landing from "./Landing";
 import Sidebar from "./Sidebar";
@@ -71,9 +71,9 @@ export default function App() {
     document.addEventListener("mouseup", onUp);
   }, []);
 
-  const addToast = useCallback((text, tone = "info") => {
+  const addToast = useCallback((text, tone = "info", action = null) => {
     const id = ++toastId;
-    setToasts((t) => [...t, { id, text, tone }]);
+    setToasts((t) => [...t, { id, text, tone, action }]);
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 4500);
   }, []);
   const dismissToast = useCallback((id) => setToasts((t) => t.filter((x) => x.id !== id)), []);
@@ -174,10 +174,43 @@ export default function App() {
     loadTasks(); // reconcile silently (e.g. a recurring task rolling over creates a sibling)
   }
 
+  async function undoDelete(id) {
+    const resp = await restoreTask(id);
+    if (!resp.ok) {
+      addToast("Couldn't restore that task. Try again.", "danger");
+      loadTasks();
+      return;
+    }
+    const task = await resp.json();
+    setTasks((t) => (t.some((x) => x.id === task.id) ? t : [...t, task]));
+    loadTasks(); // reconcile ordering and grouping
+  }
+
   function handleTaskDeleted(id) {
+    const removed = tasks.find((x) => x.id === id);
     setTasks((t) => t.filter((x) => x.id !== id));
     setSelectedTaskId((cur) => (cur === id ? null : cur));
-    addToast("Task deleted", "info");
+    addToast(removed ? `Deleted "${removed.title}"` : "Task deleted", "info", {
+      label: "Undo",
+      onClick: () => undoDelete(id),
+    });
+  }
+
+  async function handleDeleteTask(task) {
+    // Optimistic: the row goes straight away, and the toast carries the undo.
+    setTasks((t) => t.filter((x) => x.id !== task.id));
+    setSelectedTaskId((cur) => (cur === task.id ? null : cur));
+
+    const resp = await deleteTask(task.id);
+    if (!resp.ok) {
+      addToast("Couldn't delete that task. Try again.", "danger");
+      loadTasks(); // put the row back from the server's copy
+      return;
+    }
+    addToast(`Deleted "${task.title}"`, "info", {
+      label: "Undo",
+      onClick: () => undoDelete(task.id),
+    });
   }
 
   async function toggleDone(task) {
@@ -271,6 +304,7 @@ export default function App() {
               error={loadError}
               onOpenTask={openTask}
               onToggleDone={toggleDone}
+              onDeleteTask={handleDeleteTask}
             />
           ) : (
             <Activity entries={activity} />

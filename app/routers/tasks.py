@@ -36,6 +36,15 @@ def delete_task(task_id: int, user=Depends(get_current_user), session: Session =
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="task not found")
 
 
+@router.post("/{task_id}/restore", response_model=TaskRead)
+def restore_task(task_id: int, user=Depends(get_current_user), session: Session = Depends(get_session)) -> TaskRead:
+    """Undo a delete. The task comes back with its original id and history."""
+    task = TaskService(session).restore_task(task_id, user.id)
+    if task is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="task not found")
+    return task
+
+
 @router.get("", response_model=list[TaskRead])
 def list_tasks(status: str | None = None, user=Depends(get_current_user), session: Session = Depends(get_session)) -> list[TaskRead]:
     return TaskService(session).list_tasks(owner_id=user.id, status=status)

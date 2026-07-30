@@ -90,3 +90,32 @@ def test_expired_token_returns_401():
     expired_token = jwt.encode(expired_claims, SECRET, algorithm=ALGORITHM)
     resp = client.get("/tasks", cookies={"access_token": expired_token})
     assert resp.status_code == 401
+
+def test_restore_after_delete_returns_the_same_task():
+    register_and_login(client, "u10@x.com")
+    created = client.post("/tasks", json={"title": "write the spec", "priority": "high"}).json()
+
+    assert client.delete(f"/tasks/{created['id']}").status_code == 204
+    assert client.get(f"/tasks/{created['id']}").status_code == 404
+
+    resp = client.post(f"/tasks/{created['id']}/restore")
+    assert resp.status_code == 200
+    restored = resp.json()
+    assert restored["id"] == created["id"]
+    assert restored["title"] == "write the spec"
+    assert restored["priority"] == "high"
+    assert client.get(f"/tasks/{created['id']}").status_code == 200
+
+def test_restore_missing_task_returns_404():
+    register_and_login(client, "u11@x.com")
+    assert client.post("/tasks/99999/restore").status_code == 404
+
+def test_deleted_task_is_absent_from_the_list():
+    register_and_login(client, "u12@x.com")
+    keep = client.post("/tasks", json={"title": "keep me"}).json()
+    drop = client.post("/tasks", json={"title": "drop me"}).json()
+    client.delete(f"/tasks/{drop['id']}")
+
+    ids = [t["id"] for t in client.get("/tasks").json()]
+    assert keep["id"] in ids
+    assert drop["id"] not in ids

@@ -1,7 +1,7 @@
 import TaskRow from "./TaskRow";
 import { STATUS_LABELS, filterTasks, groupByStatus } from "./taskUtils";
 
-export default function TaskList({ tasks, filter, error, onOpenTask, onToggleDone }) {
+export default function TaskList({ tasks, filter, error, onOpenTask, onToggleDone, onDeleteTask }) {
   const filtered = filterTasks(tasks, filter);
   const groups = groupByStatus(filtered);
 
@@ -23,7 +23,13 @@ export default function TaskList({ tasks, filter, error, onOpenTask, onToggleDon
             )}
             <div className="task-group-rows">
               {group.map((t) => (
-                <TaskRow key={t.id} task={t} onOpen={onOpenTask} onToggleDone={onToggleDone} />
+                <TaskRow
+                  key={t.id}
+                  task={t}
+                  onOpen={onOpenTask}
+                  onToggleDone={onToggleDone}
+                  onDelete={onDeleteTask}
+                />
               ))}
             </div>
           </div>

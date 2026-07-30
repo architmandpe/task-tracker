@@ -1,7 +1,7 @@
 import { formatDue } from "./taskUtils";
-import { IconCheckCircle } from "./Icons";
+import { IconCheckCircle, IconTrash } from "./Icons";
 
-export default function TaskRow({ task, onOpen, onToggleDone }) {
+export default function TaskRow({ task, onOpen, onToggleDone, onDelete }) {
   const due = formatDue(task.due_at);
   const done = task.status === "done";
 
@@ -24,6 +24,18 @@ export default function TaskRow({ task, onOpen, onToggleDone }) {
         {due && <span className={`badge due-${due.tone}`}>{due.label}</span>}
         {task.recurrence && <span className="badge recurrence">&#8635; {task.recurrence}</span>}
       </span>
+      <button
+        className="task-delete"
+        onClick={(e) => {
+          // The row itself opens the detail panel.
+          e.stopPropagation();
+          onDelete(task);
+        }}
+        title={`Delete "${task.title}"`}
+        aria-label={`Delete "${task.title}"`}
+      >
+        <IconTrash className="icon-xs" />
+      </button>
     </div>
   );
 }

@@ -25,6 +25,9 @@ class Task(Base):
     priority: Mapped[str] = mapped_column(String(20), default="normal")
     due_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
     recurrence: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    # Soft delete: set on delete, cleared on restore. The row keeps its id so an
+    # undo brings back the same task rather than a copy of it.
+    deleted_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True, index=True)
 
 class AgentAction(Base):
     __tablename__ = "agent_actions"

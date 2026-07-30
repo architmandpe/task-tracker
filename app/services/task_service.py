@@ -17,6 +17,9 @@ class TaskService:
     def delete_task(self, task_id: int, owner_id: int) -> bool:
         return self.repo.delete(task_id, owner_id)
 
+    def restore_task(self, task_id: int, owner_id: int):
+        return self.repo.restore(task_id, owner_id)
+
     
     def list_tasks(self, owner_id: int, status: str | None = None):
         return self.repo.list_for_user(owner_id, status=status)

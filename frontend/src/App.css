@@ -745,6 +745,40 @@ body.resizing-chat {
   flex-shrink: 0;
 }
 
+/* The slot is always reserved, so revealing the button on hover never shifts the
+   badges sideways. Only its opacity changes. */
+.task-delete {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.12s ease, background-color 0.12s ease, color 0.12s ease;
+}
+
+.task:hover .task-delete,
+.task-delete:focus-visible {
+  opacity: 1;
+}
+
+.task-delete:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* Touch devices have no hover to reveal it. */
+@media (hover: none) {
+  .task-delete {
+    opacity: 1;
+  }
+}
+
 /* --- Detail slide-over --- */
 
 .detail-overlay {
@@ -1412,6 +1446,9 @@ body.resizing-chat {
 }
 
 .toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   background: var(--bg-panel);
   border: 1px solid var(--border);
   border-left: 3px solid var(--text-muted);
@@ -1422,6 +1459,25 @@ body.resizing-chat {
   color: var(--text-primary);
   cursor: pointer;
   animation: toastIn 0.16s ease;
+}
+
+.toast-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-action {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  background: transparent;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+}
+
+.toast-action:hover {
+  background: var(--accent-soft);
 }
 
 @keyframes toastIn {
