@@ -153,3 +153,20 @@ export function IconSparkle({ className }) {
     </svg>
   );
 }
+
+export function IconSun({ className }) {
+  return (
+    <svg className={className} {...base}>
+      <circle cx="8" cy="8" r="3" />
+      <path d="M8 1.5v1.2M8 13.3v1.2M14.5 8h-1.2M2.7 8H1.5M12.6 3.4l-.85.85M4.25 11.75l-.85.85M12.6 12.6l-.85-.85M4.25 4.25l-.85-.85" />
+    </svg>
+  );
+}
+
+export function IconMoon({ className }) {
+  return (
+    <svg className={className} {...base}>
+      <path d="M13.5 9.4A5.6 5.6 0 016.6 2.5a5.6 5.6 0 106.9 6.9z" />
+    </svg>
+  );
+}

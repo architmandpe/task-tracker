@@ -41,6 +41,15 @@ export default function App() {
   });
   const chatWidthRef = useRef(chatWidth);
 
+  // Light by default so the app opens in the same key as the landing page; the
+  // system preference is deliberately ignored in favour of an explicit choice.
+  const [theme, setTheme] = useState(() => (localStorage.getItem("theme") === "dark" ? "dark" : "light"));
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
   const startChatResize = useCallback((e) => {
     e.preventDefault();
     const startX = e.clientX;
@@ -248,6 +257,8 @@ export default function App() {
         onNewTask={() => setNewTaskDraft("")}
         onOpenPalette={() => setPaletteOpen(true)}
         onLogout={handleLogout}
+        theme={theme}
+        onToggleTheme={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
       />
 
       <div id="main-column">

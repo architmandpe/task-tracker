@@ -1,4 +1,4 @@
-import { IconList, IconCircleDot, IconCheckCircle, IconClock, IconPlus, IconSearch, IconLogOut, IconCommand, IconCadence } from "./Icons";
+import { IconList, IconCircleDot, IconCheckCircle, IconClock, IconPlus, IconSearch, IconLogOut, IconCommand, IconCadence, IconSun, IconMoon } from "./Icons";
 
 const NAV_ITEMS = [
   { key: "all", label: "All Tasks", icon: IconList },
@@ -6,7 +6,9 @@ const NAV_ITEMS = [
   { key: "done", label: "Done", icon: IconCheckCircle },
 ];
 
-export default function Sidebar({ user, view, filter, counts, onSelectTasks, onSelectActivity, onNewTask, onOpenPalette, onLogout }) {
+export default function Sidebar({ user, view, filter, counts, onSelectTasks, onSelectActivity, onNewTask, onOpenPalette, onLogout, theme, onToggleTheme }) {
+  const dark = theme === "dark";
+
   return (
     <aside id="sidebar">
       <div className="sidebar-brand">
@@ -48,6 +50,22 @@ export default function Sidebar({ user, view, filter, counts, onSelectTasks, onS
           <span>Activity</span>
         </button>
       </nav>
+
+      <button
+        type="button"
+        className={`theme-toggle${dark ? " is-dark" : ""}`}
+        onClick={onToggleTheme}
+        role="switch"
+        aria-checked={dark}
+        title={dark ? "Switch to light mode" : "Switch to dark mode"}
+      >
+        <span className="theme-toggle-track" aria-hidden="true">
+          <IconSun className="icon-xs theme-icon-sun" />
+          <IconMoon className="icon-xs theme-icon-moon" />
+          <span className="theme-toggle-knob" />
+        </span>
+        <span className="theme-toggle-label">{dark ? "Dark" : "Light"}</span>
+      </button>
 
       <div className="sidebar-footer">
         <div className="sidebar-user">
