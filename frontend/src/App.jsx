@@ -78,6 +78,18 @@ export default function App() {
   }, []);
   const dismissToast = useCallback((id) => setToasts((t) => t.filter((x) => x.id !== id)), []);
 
+  // The boot spinner renders while loggedIn is null, so the initial check has to
+  // land on true or false in every branch. A failing /tasks must never leave the
+  // session undecided, or the app hangs on the spinner forever.
+  async function resolveSessionAfterFailure() {
+    try {
+      const resp = await getMe();
+      setLoggedIn(resp.ok);
+    } catch {
+      setLoggedIn(false);
+    }
+  }
+
   async function loadTasks(isInitialCheck = false) {
     setLoadError("");
     let resp;
@@ -85,6 +97,7 @@ export default function App() {
       resp = await listTasks();
     } catch {
       setLoadError("Can't reach the server. Check your connection and try again.");
+      if (isInitialCheck) await resolveSessionAfterFailure();
       return;
     }
     if (resp.status === 401) {
@@ -94,6 +107,7 @@ export default function App() {
     }
     if (!resp.ok) {
       setLoadError("Couldn't load your tasks. Try refreshing the page.");
+      if (isInitialCheck) await resolveSessionAfterFailure();
       return;
     }
     setTasks(await resp.json());
