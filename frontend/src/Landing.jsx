@@ -1,4 +1,3 @@
-import { IconCadence } from "./Icons";
 import "./Landing.css";
 
 const FEATURES = [
@@ -27,20 +26,18 @@ const FEATURES = [
 export default function Landing({ onLogin, onSignup }) {
   return (
     <div className="landing-page">
-      <nav className="landing-nav">
-        <div className="landing-nav-brand">
-          <span className="landing-mark"><IconCadence className="icon-xs" /></span>
-          <span className="landing-wordmark">Cadence</span>
-        </div>
-        <div className="landing-nav-actions">
-          <button type="button" className="landing-btn landing-btn-ghost" onClick={onLogin}>Log in</button>
-          <button type="button" className="landing-btn landing-btn-dark" onClick={onSignup}>Sign up</button>
-        </div>
-      </nav>
-
       <header className="landing-hero">
         <img className="landing-hero-photo" src="/hero-bg.jpg" alt="" aria-hidden="true" />
         <div className="landing-hero-overlay" aria-hidden="true" />
+
+        <nav className="landing-nav">
+          <span className="landing-wordmark">Cadence</span>
+          <div className="landing-nav-actions">
+            <button type="button" className="landing-btn landing-btn-ghost-light" onClick={onLogin}>Log in</button>
+            <button type="button" className="landing-btn landing-btn-light" onClick={onSignup}>Sign up</button>
+          </div>
+        </nav>
+
         <div className="landing-hero-content">
           <span className="landing-eyebrow">Your AI task assistant</span>
           <h1 className="landing-headline">

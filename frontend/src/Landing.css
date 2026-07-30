@@ -31,39 +31,27 @@
 }
 
 /* --- Nav --- */
+/* Sits inside the hero, over the photo, so the image runs to the very top edge. */
 
 .landing-nav {
+  position: relative;
+  z-index: 2;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
-}
-
-.landing-nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.landing-mark {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: var(--gradient-azure-action);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  padding: 22px 0;
 }
 
 .landing-wordmark {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-weight: 600;
-  font-size: 16px;
-  letter-spacing: -0.01em;
+  font-size: 27px;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  color: var(--color-pure-white);
 }
 
 .landing-nav-actions {
@@ -109,11 +97,20 @@
   background: rgba(255, 255, 255, 0.15);
 }
 
+.landing-btn-light {
+  background: var(--color-pure-white);
+  color: var(--color-ink-black);
+}
+
+.landing-btn-light:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+
 /* --- Hero --- */
 
 .landing-hero {
   position: relative;
-  padding: 64px 24px 0;
+  padding: 0 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -140,6 +137,8 @@
 .landing-hero-content {
   position: relative;
   z-index: 2;
+  width: 100%;
+  padding-top: 76px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -299,8 +298,12 @@
 }
 
 @media (max-width: 560px) {
-  .landing-nav-actions .landing-btn-ghost {
+  .landing-nav-actions .landing-btn-ghost-light {
     display: none;
+  }
+
+  .landing-wordmark {
+    font-size: 22px;
   }
 
   .landing-headline {
