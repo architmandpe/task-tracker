@@ -1247,8 +1247,279 @@ body.resizing-chat {
   padding: 7px 10px;
 }
 
+/* --- Select & date picker --- */
+/* Native <select> and <input type="date"> hand their popups to the browser,
+   which ignores the app's theme. These are drop-in replacements. */
+
+.ui-select,
+.ui-datepicker {
+  position: relative;
+}
+
+.ui-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 9px 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 400;
+  text-align: left;
+}
+
+.ui-select-trigger:hover {
+  background: var(--bg-panel);
+  border-color: var(--border-strong);
+}
+
+.ui-select-trigger.is-open {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.ui-select-trigger.is-empty .ui-select-value {
+  color: var(--text-muted);
+}
+
+.ui-select-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ui-select-caret,
+.ui-date-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.ui-select-caret {
+  transition: transform 0.15s ease;
+}
+
+.is-open .ui-select-caret {
+  transform: rotate(180deg);
+}
+
+.ui-select-list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: 232px;
+  overflow-y: auto;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  animation: uiPopIn 0.12s ease;
+}
+
+.ui-select-list.drop-up {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+.ui-select-list:focus {
+  outline: none;
+}
+
+@keyframes uiPopIn {
+  from { opacity: 0; transform: translateY(-4px); }
+}
+
+.ui-select-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.ui-select-option.is-active {
+  background: var(--bg-hover);
+}
+
+.ui-select-option.is-selected {
+  font-weight: 500;
+}
+
+.ui-select-option-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.ui-select-tick {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.ui-date-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.ui-date-clear:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.ui-date-pop {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 250px;
+  padding: 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  animation: uiPopIn 0.12s ease;
+}
+
+.ui-date-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ui-date-month {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ui-date-weekdays,
+.ui-date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.ui-date-weekdays span {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding-bottom: 4px;
+}
+
+.ui-date-day {
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.ui-date-day:hover {
+  background: var(--bg-hover);
+}
+
+.ui-date-day.out {
+  color: var(--text-muted);
+  opacity: 0.55;
+}
+
+.ui-date-day.today {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.ui-date-day.selected,
+.ui-date-day.selected:hover {
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.ui-date-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.ui-date-action {
+  flex: 1;
+  padding: 6px;
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+}
+
+.ui-date-action:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* --- Description save --- */
+
 .detail-description-field {
   margin-top: 8px;
+}
+
+.detail-description-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.detail-save-hint {
+  font-size: 12px;
+  color: var(--warning);
+}
+
+.detail-save-hint.is-saved {
+  color: var(--success);
+}
+
+.detail-save-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.detail-description-actions button {
+  padding: 6px 14px;
+  font-size: 13px;
 }
 
 .detail-description {

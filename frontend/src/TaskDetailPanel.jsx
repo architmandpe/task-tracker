@@ -2,19 +2,65 @@ import { useEffect, useRef, useState } from "react";
 import { updateTask, deleteTask } from "./api";
 import { toDateInputValue } from "./taskUtils";
 import { IconX, IconTrash } from "./Icons";
+import Select from "./Select";
+import DatePicker from "./DatePicker";
+
+const STATUS_OPTIONS = [
+  { value: "todo", label: "Todo", dot: "var(--text-muted)" },
+  { value: "in_progress", label: "In Progress", dot: "var(--warning)" },
+  { value: "done", label: "Done", dot: "var(--success)" },
+];
+
+const PRIORITY_OPTIONS = [
+  { value: "low", label: "Low", dot: "var(--border-strong)" },
+  { value: "normal", label: "Normal", dot: "var(--accent)" },
+  { value: "high", label: "High", dot: "var(--danger)" },
+];
+
+const RECURRENCE_OPTIONS = [
+  { value: "", label: "Never" },
+  { value: "daily", label: "Daily" },
+  { value: "weekly", label: "Weekly" },
+  { value: "monthly", label: "Monthly" },
+];
 
 export default function TaskDetailPanel({ task, onClose, onUpdated, onDeleted, onError }) {
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || "");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
   const panelRef = useRef(null);
+  const descriptionRef = useRef(description);
+
+  const savedDescription = task.description || "";
+  const descriptionDirty = description.trim() !== savedDescription;
 
   useEffect(() => {
     setTitle(task.title);
     setDescription(task.description || "");
     setConfirmingDelete(false);
+    setJustSaved(false);
     panelRef.current?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [task.id]);
+
+  // Keeps the latest draft available to the unmount handler below without
+  // re-running it on every keystroke.
+  useEffect(() => {
+    descriptionRef.current = description;
+  }, [description]);
+
+  // Closing the panel with an unsaved description would silently bin it, so it
+  // gets flushed on the way out. The Save button is for confidence, not the only
+  // way to keep your words.
+  useEffect(() => {
+    return () => {
+      const draft = descriptionRef.current.trim();
+      if (draft !== (task.description || "")) {
+        updateTask(task.id, { description: draft || null });
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task.id]);
 
@@ -36,9 +82,11 @@ export default function TaskDetailPanel({ task, onClose, onUpdated, onDeleted, o
     if (trimmed !== task.title) save({ title: trimmed });
   }
 
-  function saveDescription() {
-    const next = description.trim() || null;
-    if (next !== (task.description || null)) save({ description: next });
+  async function saveDescription() {
+    if (!descriptionDirty) return;
+    await save({ description: description.trim() || null });
+    setJustSaved(true);
+    setTimeout(() => setJustSaved(false), 2000);
   }
 
   async function handleDelete() {
@@ -78,55 +126,77 @@ export default function TaskDetailPanel({ task, onClose, onUpdated, onDeleted, o
         />
 
         <div className="detail-fields">
-          <label className="detail-field">
+          <div className="detail-field">
             <span>Status</span>
-            <select value={task.status} onChange={(e) => save({ status: e.target.value })}>
-              <option value="todo">Todo</option>
-              <option value="in_progress">In Progress</option>
-              <option value="done">Done</option>
-            </select>
-          </label>
-
-          <label className="detail-field">
-            <span>Priority</span>
-            <select value={task.priority} onChange={(e) => save({ priority: e.target.value })}>
-              <option value="low">Low</option>
-              <option value="normal">Normal</option>
-              <option value="high">High</option>
-            </select>
-          </label>
-
-          <label className="detail-field">
-            <span>Due date</span>
-            <input
-              type="date"
-              value={toDateInputValue(task.due_at)}
-              onChange={(e) => save({ due_at: e.target.value ? new Date(e.target.value).toISOString() : null })}
+            <Select
+              ariaLabel="Status"
+              value={task.status}
+              options={STATUS_OPTIONS}
+              onChange={(v) => save({ status: v })}
             />
-          </label>
+          </div>
 
-          <label className="detail-field">
+          <div className="detail-field">
+            <span>Priority</span>
+            <Select
+              ariaLabel="Priority"
+              value={task.priority}
+              options={PRIORITY_OPTIONS}
+              onChange={(v) => save({ priority: v })}
+            />
+          </div>
+
+          <div className="detail-field">
+            <span>Due date</span>
+            <DatePicker
+              value={toDateInputValue(task.due_at)}
+              onChange={(v) => save({ due_at: v ? new Date(v).toISOString() : null })}
+            />
+          </div>
+
+          <div className="detail-field">
             <span>Repeats</span>
-            <select value={task.recurrence || ""} onChange={(e) => save({ recurrence: e.target.value || null })}>
-              <option value="">Never</option>
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
-          </label>
+            <Select
+              ariaLabel="Repeats"
+              value={task.recurrence || ""}
+              options={RECURRENCE_OPTIONS}
+              onChange={(v) => save({ recurrence: v || null })}
+            />
+          </div>
         </div>
 
-        <label className="detail-field detail-description-field">
+        <div className="detail-field detail-description-field">
           <span>Description</span>
           <textarea
             className="detail-description"
             placeholder="Add more detail…"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            onBlur={saveDescription}
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") saveDescription();
+            }}
             rows={6}
           />
-        </label>
+          <div className="detail-description-actions">
+            {descriptionDirty ? (
+              <span className="detail-save-hint">Unsaved changes</span>
+            ) : justSaved ? (
+              <span className="detail-save-hint is-saved">Saved</span>
+            ) : (
+              <span />
+            )}
+            <div className="detail-save-buttons">
+              {descriptionDirty && (
+                <button type="button" className="secondary" onClick={() => setDescription(savedDescription)}>
+                  Discard
+                </button>
+              )}
+              <button type="button" onClick={saveDescription} disabled={!descriptionDirty}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
 
         <div className="detail-footer">
           <span className="detail-created">Created {new Date(task.created_at).toLocaleDateString()}</span>

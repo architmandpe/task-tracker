@@ -1,5 +1,20 @@
 import { useState } from "react";
 import { createTask } from "./api";
+import Select from "./Select";
+import DatePicker from "./DatePicker";
+
+const PRIORITY_OPTIONS = [
+  { value: "low", label: "Low", dot: "var(--border-strong)" },
+  { value: "normal", label: "Normal", dot: "var(--accent)" },
+  { value: "high", label: "High", dot: "var(--danger)" },
+];
+
+const RECURRENCE_OPTIONS = [
+  { value: "", label: "Never" },
+  { value: "daily", label: "Daily" },
+  { value: "weekly", label: "Weekly" },
+  { value: "monthly", label: "Monthly" },
+];
 
 export default function NewTaskModal({ initialTitle = "", initialDueDate = "", onClose, onCreated, onError }) {
   const [title, setTitle] = useState(initialTitle);
@@ -51,27 +66,18 @@ export default function NewTaskModal({ initialTitle = "", initialDueDate = "", o
         />
 
         <div className="modal-fields">
-          <label className="detail-field">
+          <div className="detail-field">
             <span>Priority</span>
-            <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-              <option value="low">Low</option>
-              <option value="normal">Normal</option>
-              <option value="high">High</option>
-            </select>
-          </label>
-          <label className="detail-field">
+            <Select ariaLabel="Priority" value={priority} options={PRIORITY_OPTIONS} onChange={setPriority} />
+          </div>
+          <div className="detail-field">
             <span>Due date</span>
-            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
-          </label>
-          <label className="detail-field">
+            <DatePicker value={dueDate} onChange={setDueDate} />
+          </div>
+          <div className="detail-field">
             <span>Repeats</span>
-            <select value={recurrence} onChange={(e) => setRecurrence(e.target.value)}>
-              <option value="">Never</option>
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
-          </label>
+            <Select ariaLabel="Repeats" value={recurrence} options={RECURRENCE_OPTIONS} onChange={setRecurrence} />
+          </div>
         </div>
 
         <div className="modal-actions">
