@@ -1937,22 +1937,27 @@ body.resizing-chat {
    the conversation starts - art under live text fights the text. Lives inside
    the scroller so it can never bleed into the header or the composer. */
 .chat-aurora {
+  /* The one number to turn the art up or down. */
+  --aurora-strength: 0.14;
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.05;
+  opacity: var(--aurora-strength);
   transition: opacity 0.45s ease;
+  /* Two overlapping blooms with an eased tail, so they read as one diagonal
+     sweep rather than two spotlights with a visible rim. */
   background:
-    radial-gradient(46% 30% at 34% 38%, rgb(81, 139, 219) 0%, rgba(81, 139, 219, 0) 68%),
-    radial-gradient(42% 28% at 64% 58%, rgb(54, 186, 184) 0%, rgba(54, 186, 184, 0) 70%);
-  /* A gradient this shallow quantises into visible rings at 8-bit; the blur
-     smears the steps back into a wash. */
-  filter: blur(60px);
+    radial-gradient(72% 44% at 28% 32%, rgb(81, 139, 219) 0%, rgba(81, 139, 219, 0.42) 38%, rgba(81, 139, 219, 0) 78%),
+    radial-gradient(68% 42% at 72% 64%, rgb(54, 186, 184) 0%, rgba(54, 186, 184, 0.42) 38%, rgba(54, 186, 184, 0) 80%);
+  /* Smooths the 8-bit stepping in so shallow a ramp. Kept modest - a wide blur
+     spreads the bloom out and flattens its peak, which is what made the first
+     pass invisible. */
+  filter: blur(32px);
 }
 
 :root[data-theme="dark"] .chat-aurora {
-  opacity: 0.08;
+  --aurora-strength: 0.26;
 }
 
 .chat-aurora.is-hidden,
