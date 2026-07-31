@@ -2,8 +2,8 @@ import { formatDue } from "./taskUtils";
 import { IconCheckCircle, IconTrash } from "./Icons";
 
 export default function TaskRow({ task, onOpen, onToggleDone, onDelete }) {
-  const due = formatDue(task.due_at);
   const done = task.status === "done";
+  const due = formatDue(task.due_at, done);
 
   return (
     <div className={`task${done ? " done" : ""}`} onClick={() => onOpen(task.id)}>

@@ -173,7 +173,8 @@ select:focus {
   border-color: var(--accent);
 }
 
-input:disabled {
+input:disabled,
+textarea:disabled {
   background: var(--bg-subtle);
   color: var(--text-muted);
 }
@@ -1049,6 +1050,11 @@ body.resizing-chat {
   padding: 14px 4px 8px;
 }
 
+/* The one divider worth colouring - everything else stays quiet. */
+.task-group-overdue .task-group-label {
+  color: var(--danger);
+}
+
 .task-group-rows {
   border-radius: var(--radius);
   overflow: hidden;
@@ -1897,15 +1903,18 @@ body.resizing-chat {
   color: var(--text-muted);
 }
 
+/* Deliberately transparent: a filled container here sat *above* the message
+   bubbles in dark mode (--bg-subtle is lighter than the --bg-panel bubbles),
+   which inverted the elevation. Messages sit straight on the panel instead, so
+   the bubbles are the only raised surface. */
 #chat-messages {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px;
+  padding: 4px 2px;
   margin-bottom: 10px;
-  background: var(--bg-subtle);
 }
 
 .chat-empty {
@@ -1922,6 +1931,45 @@ body.resizing-chat {
 .chat-empty p {
   font-size: 13px;
   color: var(--text-muted);
+}
+
+/* A soft bloom of the brand gradient behind the empty state. It fades out once
+   the conversation starts - art under live text fights the text. Lives inside
+   the scroller so it can never bleed into the header or the composer. */
+.chat-aurora {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  transition: opacity 0.45s ease;
+  background:
+    radial-gradient(46% 30% at 34% 38%, rgb(81, 139, 219) 0%, rgba(81, 139, 219, 0) 68%),
+    radial-gradient(42% 28% at 64% 58%, rgb(54, 186, 184) 0%, rgba(54, 186, 184, 0) 70%);
+  /* A gradient this shallow quantises into visible rings at 8-bit; the blur
+     smears the steps back into a wash. */
+  filter: blur(60px);
+}
+
+:root[data-theme="dark"] .chat-aurora {
+  opacity: 0.08;
+}
+
+.chat-aurora.is-hidden,
+:root[data-theme="dark"] .chat-aurora.is-hidden {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-aurora {
+    transition: none;
+  }
+}
+
+.chat-empty,
+.chat-msg {
+  position: relative;
+  z-index: 1;
 }
 
 .chat-suggestions {
@@ -1962,6 +2010,8 @@ body.resizing-chat {
   background: var(--accent);
   color: white;
   margin-left: auto;
+  /* Shift+Enter line breaks have to survive into the sent bubble. */
+  white-space: pre-wrap;
 }
 
 .chat-msg.assistant {
@@ -2047,20 +2097,73 @@ body.resizing-chat {
   flex-shrink: 0;
 }
 
+/* The suggestions stay reachable after the conversation starts - as a compact
+   scrolling rail above the composer rather than the full-width empty-state list. */
+.chat-followups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex-shrink: 0;
+  padding-bottom: 8px;
+}
+
+.chat-followup {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 400;
+  white-space: nowrap;
+  padding: 5px 11px;
+  flex-shrink: 0;
+  /* At the narrowest panel width a chip can outgrow the row - clip, don't spill. */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-followup:hover {
+  background: var(--bg-panel);
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
 #chat-section form {
   flex-shrink: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
 }
 
-#chat-section form input {
+/* Grows with the message up to ~4 lines, then scrolls - long natural-language
+   requests are the point of this panel, and a single line hid most of them. */
+#chat-section form textarea {
   margin: 0;
   flex: 1;
   min-width: 0;
+  resize: none;
+  overflow-y: hidden;
+  line-height: 20px;
+  padding: 8px 12px;
+  max-height: 98px;
+}
+
+.chat-hint {
+  flex-shrink: 0;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  text-align: right;
+  padding: 5px 44px 0 0;
+}
+
+.chat-hint kbd {
+  font-size: 10.5px;
+  padding: 0 4px;
 }
 
 #chat-send {
+  margin-bottom: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
