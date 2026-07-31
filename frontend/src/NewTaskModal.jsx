@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { createTask } from "./api";
 
-export default function NewTaskModal({ initialTitle = "", onClose, onCreated, onError }) {
+export default function NewTaskModal({ initialTitle = "", initialDueDate = "", onClose, onCreated, onError }) {
   const [title, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("normal");
-  const [dueDate, setDueDate] = useState("");
+  const [dueDate, setDueDate] = useState(initialDueDate);
   const [recurrence, setRecurrence] = useState("");
   const [submitting, setSubmitting] = useState(false);
 

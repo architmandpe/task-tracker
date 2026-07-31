@@ -649,6 +649,386 @@ body.resizing-chat {
   min-height: 0;
   overflow-y: auto;
   padding: 4px 28px 32px;
+  /* The calendar responds to the space it actually has, not the viewport — the
+     sidebar and the resizable assistant panel both eat into it. */
+  container-type: inline-size;
+}
+
+/* --- Layout switch --- */
+
+.layout-switch {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+  flex-shrink: 0;
+}
+
+.layout-switch button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.layout-switch button:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.layout-switch button.is-active,
+.layout-switch button.is-active:hover {
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* --- Calendar --- */
+
+#calendar-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 236px;
+  gap: 20px;
+  align-items: start;
+  min-height: 100%;
+}
+
+.cal-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.cal-month {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cal-today-btn {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+}
+
+.cal-today-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.cal-today-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.cal-weekdays,
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.cal-weekdays {
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.cal-weekdays span {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-left: 2px;
+}
+
+.cal-grid {
+  gap: 6px;
+  grid-auto-rows: minmax(96px, auto);
+}
+
+/* Slides in the direction you navigated, so ‹ › feels physical. */
+.cal-grid[data-direction="1"] { animation: calSlideFromRight 0.2s ease; }
+.cal-grid[data-direction="-1"] { animation: calSlideFromLeft 0.2s ease; }
+
+@keyframes calSlideFromRight {
+  from { opacity: 0; transform: translateX(14px); }
+}
+
+@keyframes calSlideFromLeft {
+  from { opacity: 0; transform: translateX(-14px); }
+}
+
+.cal-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 7px 7px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  cursor: pointer;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.cal-cell:hover {
+  border-color: var(--border-strong);
+}
+
+.cal-cell.weekend {
+  background: var(--bg-subtle);
+}
+
+/* Days either side of the month stay legible but recede, so the month's shape
+   reads at a glance. */
+.cal-cell.out-of-month {
+  opacity: 0.42;
+}
+
+.cal-cell-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.cal-date {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.cal-cell.is-today .cal-date {
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.cal-cell.is-today {
+  border-color: var(--accent);
+}
+
+/* Scaled to the busiest day on screen — heavy weeks read as texture before you
+   read a single word. */
+.cal-load {
+  height: 2px;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.cal-load span {
+  display: block;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--accent);
+  opacity: 0.35;
+}
+
+.cal-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.cal-chip {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 3px 6px 3px 7px;
+  border-radius: 4px;
+  border-left: 3px solid var(--text-muted);
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  overflow: hidden;
+}
+
+/* Wraps to two lines rather than truncating at one: in a narrow cell a single
+   ellipsised line degenerates into "Ship…", which tells you nothing. The clamp
+   lives on this span because -webkit-box is unreliable on a <button> itself. */
+.cal-chip-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
+}
+
+.cal-chip:hover {
+  background: var(--bg-hover);
+}
+
+.cal-chip-high {
+  border-left-color: var(--danger);
+}
+
+.cal-chip-low {
+  border-left-color: var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.cal-chip.overdue {
+  color: var(--danger);
+}
+
+.cal-chip.done {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  border-left-color: var(--success);
+}
+
+.cal-more {
+  align-self: flex-start;
+  padding: 2px 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 10.5px;
+  font-weight: 500;
+}
+
+.cal-more:hover {
+  background: transparent;
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* Tasks with no due date would simply vanish from a calendar, so they get their
+   own rail instead of being hidden. */
+.cal-rail {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-panel);
+}
+
+.cal-rail-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.cal-rail-head .nav-count {
+  margin-left: auto;
+}
+
+.cal-rail-empty {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.cal-rail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+}
+
+/* Not enough room for a side rail without starving the grid — drop it below, so
+   the seven columns get the full width. */
+@container (max-width: 1000px) {
+  #calendar-section {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cal-rail {
+    position: static;
+  }
+
+  .cal-rail-list {
+    max-height: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .cal-rail-list .cal-chip {
+    width: auto;
+    max-width: 240px;
+  }
+}
+
+/* A 7-column grid is unreadable below roughly 600px, so it becomes an agenda:
+   one row per day, date on the left, tasks stacked on the right. */
+@container (max-width: 620px) {
+  .cal-weekdays {
+    display: none;
+  }
+
+  .cal-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cal-cell {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 0;
+    padding: 8px 10px;
+  }
+
+  /* Days with nothing on them would just be noise in a list. */
+  .cal-cell.out-of-month,
+  .cal-cell:not(:has(.cal-chip)) {
+    display: none;
+  }
+
+  .cal-cell-head {
+    flex-shrink: 0;
+  }
+
+  .cal-load {
+    display: none;
+  }
+
+  .cal-chips {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 /* --- Task list --- */

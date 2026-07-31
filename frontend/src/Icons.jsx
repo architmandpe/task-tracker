@@ -71,6 +71,14 @@ export function IconChevronDown({ className }) {
   );
 }
 
+export function IconChevronLeft({ className }) {
+  return (
+    <svg className={className} {...base}>
+      <path d="M10 4L6 8l4 4" />
+    </svg>
+  );
+}
+
 export function IconChevronRight({ className }) {
   return (
     <svg className={className} {...base}>
@@ -150,6 +158,15 @@ export function IconSparkle({ className }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="currentColor" stroke="none">
       <path d="M8 2l1.1 3.4L12.5 6.5 9.1 7.6 8 11l-1.1-3.4L3.5 6.5l3.4-1.1z" />
+    </svg>
+  );
+}
+
+export function IconCalendar({ className }) {
+  return (
+    <svg className={className} {...base}>
+      <rect x="2.25" y="3.25" width="11.5" height="10.5" rx="2" />
+      <path d="M2.25 6.5h11.5M5.5 1.75v2.5M10.5 1.75v2.5" />
     </svg>
   );
 }

@@ -5,6 +5,7 @@ import Landing from "./Landing";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import TaskList from "./TaskList";
+import Calendar from "./Calendar";
 import TaskDetailPanel from "./TaskDetailPanel";
 import NewTaskModal from "./NewTaskModal";
 import CommandPalette from "./CommandPalette";
@@ -31,6 +32,8 @@ export default function App() {
   const [filter, setFilter] = useState("all"); // "all" | "active" | "done"
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [newTaskDraft, setNewTaskDraft] = useState(null); // string | null - modal open when non-null
+  const [newTaskDate, setNewTaskDate] = useState(""); // yyyy-mm-dd, prefilled when adding from a calendar day
+  const [layout, setLayout] = useState(() => (localStorage.getItem("layout") === "calendar" ? "calendar" : "list"));
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
@@ -49,6 +52,21 @@ export default function App() {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem("theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem("layout", layout);
+  }, [layout]);
+
+  // Every entry point into the new-task modal goes through here, so a date
+  // prefilled from a calendar day can't leak into the next task you create.
+  const openNewTask = useCallback((title = "", date = "") => {
+    setNewTaskDraft(title);
+    setNewTaskDate(date);
+  }, []);
+  const closeNewTask = useCallback(() => {
+    setNewTaskDraft(null);
+    setNewTaskDate("");
+  }, []);
 
   const startChatResize = useCallback((e) => {
     e.preventDefault();
@@ -157,7 +175,7 @@ export default function App() {
       }
       if (e.key === "Escape") {
         if (paletteOpen) setPaletteOpen(false);
-        else if (newTaskDraft !== null) setNewTaskDraft(null);
+        else if (newTaskDraft !== null) closeNewTask();
         else if (selectedTaskId !== null) setSelectedTaskId(null);
         return;
       }
@@ -165,12 +183,12 @@ export default function App() {
       const typing = tag === "INPUT" || tag === "TEXTAREA";
       if (!typing && loggedIn && e.key.toLowerCase() === "n") {
         e.preventDefault();
-        setNewTaskDraft("");
+        openNewTask();
       }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [paletteOpen, newTaskDraft, selectedTaskId, loggedIn]);
+  }, [paletteOpen, newTaskDraft, selectedTaskId, loggedIn, openNewTask, closeNewTask]);
 
   function openTask(id) {
     setPaletteOpen(false);
@@ -179,7 +197,7 @@ export default function App() {
 
   function handleTaskCreated(task) {
     setTasks((t) => [task, ...t]);
-    setNewTaskDraft(null);
+    closeNewTask();
     addToast(`Created "${task.title}"`, "success");
   }
 
@@ -241,7 +259,7 @@ export default function App() {
 
   function handlePaletteNewTask(title) {
     setPaletteOpen(false);
-    setNewTaskDraft(title);
+    openNewTask(title);
   }
 
   function handlePaletteChangeView(target) {
@@ -301,7 +319,7 @@ export default function App() {
         counts={counts}
         onSelectTasks={selectTasksView}
         onSelectActivity={() => setView("activity")}
-        onNewTask={() => setNewTaskDraft("")}
+        onNewTask={() => openNewTask()}
         onOpenPalette={() => setPaletteOpen(true)}
         onLogout={handleLogout}
         theme={theme}
@@ -309,9 +327,24 @@ export default function App() {
       />
 
       <div id="main-column">
-        <Topbar view={view} filter={filter} count={visibleCount} />
+        <Topbar
+          view={view}
+          filter={filter}
+          count={visibleCount}
+          layout={layout}
+          onLayoutChange={setLayout}
+        />
         <main id="main-content">
-          {view === "tasks" ? (
+          {view !== "tasks" ? (
+            <Activity entries={activity} />
+          ) : layout === "calendar" ? (
+            <Calendar
+              tasks={filterTasks(tasks, filter)}
+              onOpenTask={openTask}
+              onNewTaskOnDate={(date) => openNewTask("", date)}
+              navEnabled={!paletteOpen && newTaskDraft === null && selectedTaskId === null}
+            />
+          ) : (
             <TaskList
               tasks={tasks}
               filter={filter}
@@ -320,8 +353,6 @@ export default function App() {
               onToggleDone={toggleDone}
               onDeleteTask={handleDeleteTask}
             />
-          ) : (
-            <Activity entries={activity} />
           )}
         </main>
       </div>
@@ -361,7 +392,8 @@ export default function App() {
       {newTaskDraft !== null && (
         <NewTaskModal
           initialTitle={newTaskDraft}
-          onClose={() => setNewTaskDraft(null)}
+          initialDueDate={newTaskDate}
+          onClose={closeNewTask}
           onCreated={handleTaskCreated}
           onError={(msg) => addToast(msg, "danger")}
         />
