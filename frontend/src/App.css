@@ -1865,12 +1865,40 @@ body.resizing-chat {
 
 /* --- Chat --- */
 
+/* A soft bloom of the brand gradient - two overlapping blooms with an eased tail
+   so they read as one diagonal sweep rather than two spotlights with a visible
+   rim. It's the panel's own background, so it covers the tab edge to edge and
+   stays pinned while the conversation scrolls over it. Every message sits in an
+   opaque bubble, so the art never ends up under text.
+
+   Alpha is baked into the stops rather than applied as element opacity, since a
+   background can't be given its own opacity. --aurora-strength is the one number
+   to turn the art up or down. Light needs roughly double dark's value to read as
+   equally present: the same absolute shift is far less visible against white. */
 #chat-section {
+  --aurora-strength: 0.30;
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
   padding: 16px 18px;
+  background-image:
+    radial-gradient(
+      72% 44% at 28% 32%,
+      rgb(81 139 219 / var(--aurora-strength)) 0%,
+      rgb(81 139 219 / calc(var(--aurora-strength) * 0.42)) 38%,
+      rgb(81 139 219 / 0) 78%
+    ),
+    radial-gradient(
+      68% 42% at 72% 64%,
+      rgb(54 186 184 / var(--aurora-strength)) 0%,
+      rgb(54 186 184 / calc(var(--aurora-strength) * 0.42)) 38%,
+      rgb(54 186 184 / 0) 80%
+    );
+}
+
+:root[data-theme="dark"] #chat-section {
+  --aurora-strength: 0.26;
 }
 
 .chat-header {
@@ -1933,49 +1961,7 @@ body.resizing-chat {
   color: var(--text-muted);
 }
 
-/* A soft bloom of the brand gradient behind the empty state. It fades out once
-   the conversation starts - art under live text fights the text. Lives inside
-   the scroller so it can never bleed into the header or the composer. */
-.chat-aurora {
-  /* The one number to turn the art up or down. */
-  --aurora-strength: 0.14;
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: var(--aurora-strength);
-  transition: opacity 0.45s ease;
-  /* Two overlapping blooms with an eased tail, so they read as one diagonal
-     sweep rather than two spotlights with a visible rim. */
-  background:
-    radial-gradient(72% 44% at 28% 32%, rgb(81, 139, 219) 0%, rgba(81, 139, 219, 0.42) 38%, rgba(81, 139, 219, 0) 78%),
-    radial-gradient(68% 42% at 72% 64%, rgb(54, 186, 184) 0%, rgba(54, 186, 184, 0.42) 38%, rgba(54, 186, 184, 0) 80%);
-  /* Smooths the 8-bit stepping in so shallow a ramp. Kept modest - a wide blur
-     spreads the bloom out and flattens its peak, which is what made the first
-     pass invisible. */
-  filter: blur(32px);
-}
-
-:root[data-theme="dark"] .chat-aurora {
-  --aurora-strength: 0.26;
-}
-
-.chat-aurora.is-hidden,
-:root[data-theme="dark"] .chat-aurora.is-hidden {
-  opacity: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .chat-aurora {
-    transition: none;
-  }
-}
-
-.chat-empty,
-.chat-msg {
-  position: relative;
-  z-index: 1;
-}
+/* Handled on #chat-section - see the aurora block there. */
 
 .chat-suggestions {
   display: flex;
@@ -2014,6 +2000,9 @@ body.resizing-chat {
 .chat-msg.user {
   background: var(--accent);
   color: white;
+  /* A block-level bubble fills the whole 88%, so a one-word message like "all"
+     got a full-width slab of empty accent. Hug the text and push right. */
+  width: fit-content;
   margin-left: auto;
   /* Shift+Enter line breaks have to survive into the sent bubble. */
   white-space: pre-wrap;
@@ -2312,7 +2301,9 @@ body.resizing-chat {
     position: fixed;
     inset: 0;
     z-index: 30;
-    background: var(--bg-page);
+    /* background-color, not the shorthand - the shorthand would reset the
+       aurora's background-image to none at this breakpoint. */
+    background-color: var(--bg-page);
     display: none;
     border-right: none;
     padding: 16px;

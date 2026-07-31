@@ -33,11 +33,17 @@ def internal_create_task(user_id: int, body: InternalTaskCreate, session: Sessio
 
 class InternalBulkCreate(BaseModel):
     titles: list[str]
+    # Applied to every task in the batch. Subtasks broken out of a dated parent
+    # need to land on that parent's date, not with no date at all.
+    priority: str | None = None
+    due_at: dt.datetime | None = None
+    recurrence: str | None = None
 
 @router.post("/tasks/{user_id}/bulk", response_model=list[TaskInternal], status_code=status.HTTP_201_CREATED)
 def internal_create_tasks(user_id: int, body: InternalBulkCreate, session: Session = Depends(get_session)) -> list[TaskInternal]:
     repo = TaskRepository(session)
-    return [repo.create(title=title, owner_id=user_id) for title in body.titles]
+    shared = body.model_dump(exclude_none=True, exclude={"titles"})
+    return [repo.create(title=title, owner_id=user_id, **shared) for title in body.titles]
 
 
 class InternalBulkUpdate(InternalTaskUpdate):

@@ -130,7 +130,6 @@ export default function Chat({ onAction, mobileOpen }) {
         </div>
       </div>
       <div id="chat-messages" ref={messagesRef}>
-        <div className={`chat-aurora${messages.length > 0 ? " is-hidden" : ""}`} aria-hidden="true" />
         {messages.length === 0 && (
           <div className="chat-empty">
             <p>How can I help?</p>
