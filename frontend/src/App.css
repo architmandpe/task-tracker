@@ -1976,6 +1976,37 @@ body.resizing-chat {
   color: var(--text-muted);
 }
 
+/* Shown while the agent is calling tools, before any token arrives. */
+.chat-thinking {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+}
+
+.chat-thinking i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: chatThinking 1.2s infinite;
+}
+
+.chat-thinking i:nth-child(2) { animation-delay: 0.15s; }
+.chat-thinking i:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes chatThinking {
+  0%, 60%, 100% { opacity: 0.25; }
+  30% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-thinking i {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
 @keyframes blink {
   50% {
     opacity: 0;

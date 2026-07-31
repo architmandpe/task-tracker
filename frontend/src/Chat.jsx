@@ -118,6 +118,13 @@ export default function Chat({ onAction, mobileOpen }) {
             </div>
           )
         )}
+        {/* Between sending and the first token the agent is calling tools, which
+            can take a few seconds. Without this the panel just sits there. */}
+        {sending && messages[messages.length - 1]?.role === "user" && (
+          <div className="chat-msg assistant chat-thinking" aria-label="Assistant is thinking">
+            <i /><i /><i />
+          </div>
+        )}
       </div>
       {pendingQuestion ? (
         <div id="chat-confirm">
