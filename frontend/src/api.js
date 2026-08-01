@@ -23,6 +23,11 @@ export function getMe() {
   return request("/auth/me");
 }
 
+// Which third-party sign-in options this server actually has configured.
+export function getAuthProviders() {
+  return request("/auth/providers");
+}
+
 export function listTasks() {
   return request("/tasks");
 }

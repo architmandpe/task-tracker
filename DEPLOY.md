@@ -48,8 +48,18 @@ Edit `.env.prod` and fill in:
 - `JWT_SECRET` / `INTERNAL_SECRET` - generate fresh random values, don't reuse your local dev secrets (e.g. `openssl rand -hex 32`)
 - `TRACKER_POSTGRES_PASSWORD` / `COPILOT_POSTGRES_PASSWORD` - any values, these are just passwords for the two self-hosted Postgres containers
 - `GROQ_API_KEY` / `GEMINI_API_KEY` - same keys you use locally
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URI` - optional, for Google sign-in. Leave blank to keep the app on email and password only.
 
 This one file holds every secret both services need - `docker-compose.prod.yml` passes the relevant ones through to each container explicitly.
+
+### Google sign-in in production
+
+Two things differ from local:
+
+- Add `https://$DOMAIN/auth/google/callback` to the **Authorized redirect URIs** of the same OAuth client (an OAuth client can hold several, so one client covers both local and prod).
+- `GOOGLE_REDIRECT_URI` **must** be set here. Locally the app derives the callback URL from the incoming request; behind Caddy the request it sees is plain `http://` on an internal hostname, so it can't infer the public `https://` origin and would hand Google a redirect URI that doesn't match what you registered.
+
+Until the OAuth consent screen is **published**, only accounts listed under **Test users** can sign in. Google requires verification before a public consent screen can request more than the basic scopes; `openid email profile` is basic, so publishing is straightforward.
 
 ## 4. Build and start everything
 

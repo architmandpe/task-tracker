@@ -37,7 +37,12 @@ export default function App() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
-  const [authView, setAuthView] = useState("landing"); // "landing" | "login" | "signup"
+  // A Google handshake that didn't complete comes back to "/?google=<reason>".
+  // Without this it would land on the marketing page and the explanation would
+  // never be seen - the login card is where that message belongs.
+  const [authView, setAuthView] = useState(() =>
+    new URLSearchParams(window.location.search).has("google") ? "login" : "landing"
+  ); // "landing" | "login" | "signup"
   const [chatWidth, setChatWidth] = useState(() => {
     const saved = Number(localStorage.getItem("chatWidth"));
     return saved >= MIN_CHAT_W && saved <= MAX_CHAT_W ? saved : DEFAULT_CHAT_W;

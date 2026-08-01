@@ -48,6 +48,12 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       INTERNAL_SECRET: ${INTERNAL_SECRET}
       COPILOT_URL: http://copilot:8001
+      # Optional - Google sign-in is simply not offered when these are unset.
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      # Must be set in prod: behind Caddy the app can't infer its own public
+      # https:// origin from the proxied request.
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
     depends_on:
       db:
         condition: service_healthy

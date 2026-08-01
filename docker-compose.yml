@@ -23,6 +23,10 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       INTERNAL_SECRET: ${INTERNAL_SECRET}
       COPILOT_URL: http://host.docker.internal:8001
+      # Optional - Google sign-in is simply not offered when these are unset.
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
     depends_on:
       db:
         condition: service_healthy

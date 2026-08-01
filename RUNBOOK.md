@@ -19,6 +19,26 @@ cp .env.example .env
 
 Edit `.env` and set a real `JWT_SECRET` (any long random string) and `INTERNAL_SECRET` (must match the same value in `copilot/.env` — this is the shared secret the two services use to trust each other).
 
+### Google sign-in (optional)
+
+Leave `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` blank and the app simply doesn't offer the button — email and password keep working. To enable it:
+
+1. In [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials), create an **OAuth 2.0 Client ID** of type **Web application**.
+2. Under **Authorized redirect URIs**, add `http://localhost:5173/auth/google/callback` (the Vite dev server, which proxies `/auth` to the API). Add `http://localhost:8000/auth/google/callback` too if you also use the Docker build that serves the built frontend directly. Google exempts `localhost` from its HTTPS-only rule, so plain `http` is fine here.
+3. Copy the client ID and secret into `.env`, and set:
+
+   ```
+   GOOGLE_REDIRECT_URI=http://localhost:5173/auth/google/callback
+   ```
+
+   **This is not optional when you develop against the Vite dev server.** Vite's proxy rewrites the `Host` header to the proxy target, so the API sees `localhost:8000` and, left to derive its own callback URL, would send Google a `redirect_uri` of `http://localhost:8000/...` while your browser is on `:5173`. The sign-in would complete but dump you on port 8000, running whatever frontend was last baked into the Docker image. Pinning the value keeps you on the dev server.
+
+4. While the app is in "Testing" on the OAuth consent screen, only accounts listed under **Test users** can sign in.
+
+Your machine never needs to be reachable from the internet: Google redirects your *browser* to `localhost`, it never connects to you. Only outbound calls are made — the code exchange and the signing-key fetch — so ordinary internet access is enough.
+
+Signing in with Google using an address that already has a password account **links** the two — same account, same tasks, either way in.
+
 ## 2. copilot setup
 
 In the sibling `copilot/` directory:
