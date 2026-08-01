@@ -1867,14 +1867,17 @@ body.resizing-chat {
 
 /* A soft bloom of the brand gradient - two overlapping blooms with an eased tail
    so they read as one diagonal sweep rather than two spotlights with a visible
-   rim. It's the panel's own background, so it covers the tab edge to edge and
-   stays pinned while the conversation scrolls over it. Every message sits in an
-   opaque bubble, so the art never ends up under text.
+   rim. It's the panel's own background rather than the scroller's, so it covers
+   the tab edge to edge: on the scroller it was inset by this panel's padding,
+   which left untinted strips down both sides. It stays pinned while the
+   conversation scrolls over it, and every message sits in an opaque bubble, so
+   the art never ends up under text.
 
    Alpha is baked into the stops rather than applied as element opacity, since a
    background can't be given its own opacity. --aurora-strength is the one number
-   to turn the art up or down. Light needs roughly double dark's value to read as
-   equally present: the same absolute shift is far less visible against white. */
+   to turn the art up or down. Light needs a slightly higher value than dark to
+   read as equally present: the same absolute shift is far less visible against
+   white. */
 #chat-section {
   --aurora-strength: 0.30;
   display: flex;
@@ -1961,7 +1964,7 @@ body.resizing-chat {
   color: var(--text-muted);
 }
 
-/* Handled on #chat-section - see the aurora block there. */
+/* The aurora is painted on #chat-section, not here - see the block there. */
 
 .chat-suggestions {
   display: flex;
